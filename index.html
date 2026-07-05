@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Peixoto Gasista Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Paleta Peixoto Téc. Gasista */
+    --fire: #3DBE5C;          /* Verde Peixoto – cor principal */
+    --fire-dark: #2EA04A;     /* Verde escuro */
+    --fire-glow: rgba(61,190,92,0.16);
+    --flame: #B03A1E;         /* Vermelho-terracota da chama */
+    --flame-light: #D4491E;   /* Laranja-chama */
+    --coal: #0F1A0F;          /* Fundo dark esverdeado */
+    --deep: #080F08;          /* Fundo mais escuro */
+    --surface: #111C11;       /* Superfície */
+    --surface2: #182018;      /* Superfície 2 */
+    --card: #152015;          /* Card */
+    --border: rgba(61,190,92,0.10);
+    --text: #F0F8F1;
+    --muted: #6B8F6E;
+    --success: #3DBE5C;       /* Verde Peixoto = sucesso */
+    --warning: #D4831E;
+    --danger: #B03A1E;        /* Vermelho-chama = perigo */
+    --info: #2E9E7A;
+    --gold: #C8A020;
+    --radius: 18px;
+    --radius-sm: 10px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--deep);
+    color: var(--text);
+    min-height: 100dvh;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+    position: relative;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  /* ===== SPLASH ===== */
+  #splash {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--deep);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px;
+    transition: opacity 0.6s ease;
+  }
+  #splash.hide { opacity: 0; pointer-events: none; }
+  .splash-flame {
+    width: 80px; height: 80px;
+    background: linear-gradient(160deg, var(--fire) 0%, var(--flame-light) 50%, var(--flame) 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flicker 1.2s ease-in-out infinite alternate;
+    box-shadow: 0 0 40px var(--fire), 0 0 80px rgba(61,190,92,0.35);
+  }
+  @keyframes flicker {
+    from { transform: scaleX(1) scaleY(1) rotate(-2deg); }
+    to { transform: scaleX(0.92) scaleY(1.08) rotate(2deg); }
+  }
+  .splash-title { font-family:'Outfit',sans-serif; font-size:32px; font-weight:800; color:var(--text); letter-spacing:-0.5px; line-height:1; }
+  .splash-sub { color:var(--muted); font-size:11px; letter-spacing:3px; text-transform:uppercase; font-weight:500; margin-top:4px; }
+
+  /* ===== LAYOUT ===== */
+  #app { display:flex; flex-direction:column; min-height:100dvh; }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--coal);
+    padding: 16px 20px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+  .topbar-title { font-family:'Outfit',sans-serif; font-size:22px; font-weight:800; letter-spacing:-0.5px; line-height:1; }
+  .topbar-title span { color:var(--fire); }
+  .topbar-right { display:flex; gap:10px; align-items:center; }
+  .icon-btn {
+    width:38px; height:38px; border-radius:50%;
+    background:var(--surface); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:18px; transition:all 0.2s;
+  }
+  .icon-btn:active { transform:scale(0.92); background:var(--fire-glow); }
+  .badge {
+    position:absolute; top:-4px; right:-4px;
+    width:16px; height:16px; border-radius:50%;
+    background:var(--fire); font-size:9px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+  }
+  .icon-btn-wrap { position:relative; }
+
+  /* MAIN CONTENT */
+  .content { flex:1; padding-bottom:80px; overflow-y:auto; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:430px;
+    background: var(--coal);
+    border-top: 1px solid var(--border);
+    display: flex; z-index:100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-item {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:10px 4px 8px;
+    cursor:pointer; transition:all 0.2s;
+    position:relative;
+  }
+  .nav-item .nav-icon { font-size:22px; transition:all 0.2s; }
+  .nav-item .nav-label { font-size:10px; margin-top:3px; color:var(--muted); transition:all 0.2s; letter-spacing:0.3px; font-weight:600; font-family:'Outfit',sans-serif; text-transform:uppercase; }
+  .nav-item.active .nav-icon { filter:drop-shadow(0 0 8px var(--fire)); transform:translateY(-2px); }
+  .nav-item.active .nav-label { color:var(--fire); font-weight:700; }
+  .nav-item.active::before {
+    content:''; position:absolute; top:0; left:20%; right:20%; height:2px;
+    background:var(--fire); border-radius:0 0 4px 4px;
+  }
+
+  /* ===== PAGES ===== */
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* ===== HOME ===== */
+  .home-hero {
+    background: linear-gradient(135deg, #0A1A0A 0%, #0F200F 100%);
+    padding: 22px 20px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .greeting { font-size:12px; color:var(--muted); margin-bottom:4px; font-weight:500; letter-spacing:0.8px; text-transform:uppercase; }
+  .user-name { font-family:'Outfit',sans-serif; font-size:28px; font-weight:800; letter-spacing:-0.8px; line-height:1.1; }
+  .status-pill {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(61,190,92,0.12); border:1px solid rgba(61,190,92,0.3);
+    color:var(--fire); font-size:11px; font-weight:600;
+    padding:4px 10px; border-radius:20px; margin-top:8px;
+  }
+  .status-dot { width:6px; height:6px; border-radius:50%; background:var(--success); animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .stats-row {
+    display:grid; grid-template-columns:1fr 1fr 1fr;
+    gap:10px; padding:16px 20px;
+  }
+  .stat-card {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:14px 12px;
+    text-align:center;
+    position:relative; overflow:hidden;
+  }
+  .stat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  }
+  .stat-card.orange::before { background:var(--fire); }
+  .stat-card.green::before { background:var(--success); }
+  .stat-card.gold::before { background:var(--gold); }
+  .stat-num { font-family:'Outfit',sans-serif; font-size:26px; font-weight:800; letter-spacing:-0.5px; line-height:1; }
+  .stat-num.orange { color:var(--fire); }
+  .stat-num.green { color:var(--success); }
+  .stat-num.gold { color:var(--gold); }
+  .stat-label { font-size:10px; color:var(--muted); margin-top:5px; line-height:1.3; font-weight:600; letter-spacing:0.3px; text-transform:uppercase; }
+
+  .section-title {
+    font-family:'Outfit',sans-serif; font-size:17px; font-weight:700; letter-spacing:-0.3px;
+    padding:18px 20px 12px;
+    display:flex; align-items:center; justify-content:space-between;
+    line-height:1;
+  }
+  .section-title a { font-size:12px; color:var(--fire); text-decoration:none; font-family:'Inter',sans-serif; font-weight:600; letter-spacing:0.2px; }
+
+  /* OS CARD */
+  .os-list { padding:0 20px; display:flex; flex-direction:column; gap:10px; }
+  .os-card {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    display:flex; align-items:center; gap:14px;
+    cursor:pointer; transition:all 0.2s;
+  }
+  .os-card:active { transform:scale(0.98); }
+  .os-icon {
+    width:44px; height:44px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; flex-shrink:0;
+  }
+  .os-icon.instalacao { background:rgba(255,107,26,0.15); }
+  .os-icon.conversao { background:rgba(52,152,219,0.15); }
+  .os-icon.manutencao { background:rgba(46,204,113,0.15); }
+  .os-icon.vistoria { background:rgba(240,180,41,0.15); }
+  .os-info { flex:1; min-width:0; }
+  .os-client { font-weight:700; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.1px; }
+  .os-type { font-size:12px; color:var(--muted); margin-top:2px; font-weight:500; }
+  .os-meta { text-align:right; flex-shrink:0; }
+  .os-time { font-size:12px; color:var(--muted); font-weight:600; font-family:'Outfit',sans-serif; }
+  .os-status {
+    display:inline-block; font-size:9px; font-weight:700;
+    padding:3px 9px; border-radius:10px; margin-top:5px;
+    text-transform:uppercase; letter-spacing:0.8px; font-family:'Outfit',sans-serif;
+  }
+  .os-status.pendente { background:rgba(243,156,18,0.15); color:var(--warning); }
+  .os-status.andamento { background:rgba(52,152,219,0.15); color:var(--info); }
+  .os-status.concluida { background:rgba(46,204,113,0.15); color:var(--success); }
+  .os-status.agendada { background:rgba(155,89,182,0.15); color:#9B59B6; }
+
+  /* QUICK ACTIONS */
+  .quick-grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:10px; padding:0 20px 20px;
+  }
+  .quick-card {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px 16px;
+    cursor:pointer; transition:all 0.2s;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .quick-card:active { transform:scale(0.97); border-color:var(--fire); }
+  .quick-card .qc-icon { font-size:28px; }
+  .quick-card .qc-title { font-family:'Outfit',sans-serif; font-size:15px; font-weight:700; letter-spacing:-0.2px; line-height:1.2; }
+  .quick-card .qc-sub { font-size:12px; color:var(--muted); font-weight:500; }
+  .quick-card.primary { background:linear-gradient(135deg, rgba(61,190,92,0.2), rgba(61,190,92,0.05)); border-color:rgba(61,190,92,0.3); }
+
+  /* ===== OS PAGE ===== */
+  .filter-tabs {
+    display:flex; gap:6px; padding:14px 20px;
+    overflow-x:auto; scrollbar-width:none;
+  }
+  .filter-tabs::-webkit-scrollbar { display:none; }
+  .filter-tab {
+    white-space:nowrap; padding:7px 14px;
+    border-radius:20px; font-size:12px; font-weight:600;
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--muted); cursor:pointer; transition:all 0.2s;
+  }
+  .filter-tab.active { background:var(--fire); color:#fff; border-color:var(--fire); }
+
+  /* FORM */
+  .form-section { padding:0 20px; }
+  .form-group { margin-bottom:14px; }
+  .form-label { font-size:11px; font-weight:700; color:var(--muted); margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:0.8px; font-family:'Outfit',sans-serif; }
+  .form-control {
+    width:100%; background:var(--surface);
+    border:1.5px solid var(--border); border-radius:var(--radius-sm);
+    color:var(--text); font-family:'Inter',sans-serif;
+    font-size:15px; font-weight:500; padding:13px 14px;
+    outline:none; transition:border-color 0.2s; line-height:1.4;
+  }
+  .form-control:focus { border-color:var(--fire); }
+  select.form-control { appearance:none; cursor:pointer; }
+  textarea.form-control { resize:none; height:90px; line-height:1.6; }
+
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  .btn {
+    width:100%; padding:15px; border-radius:var(--radius-sm);
+    border:none; font-family:'Outfit',sans-serif; font-size:15px; font-weight:700;
+    cursor:pointer; transition:all 0.2s; letter-spacing:0.4px; line-height:1;
+  }
+  .btn-primary { background:var(--fire); color:#fff; }
+  .btn-primary:active { transform:scale(0.98); background:var(--fire-dark); }
+  .btn-outline { background:transparent; color:var(--fire); border:1.5px solid var(--fire); }
+  .btn-success { background:var(--success); color:#fff; }
+  .btn-danger { background:var(--danger); color:#fff; }
+  .btn-sm { padding:8px 16px; font-size:13px; width:auto; }
+
+  /* ===== CHECKLIST ===== */
+  .checklist-group { padding:0 20px 16px; }
+  .checklist-group-title { font-size:11px; font-weight:700; color:var(--muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:1.2px; font-family:'Outfit',sans-serif; }
+  .check-item {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:13px 14px;
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:8px; cursor:pointer; transition:all 0.2s;
+  }
+  .check-item.checked { border-color:rgba(46,204,113,0.4); background:rgba(46,204,113,0.05); }
+  .check-box {
+    width:22px; height:22px; border-radius:6px; flex-shrink:0;
+    border:2px solid var(--border); display:flex; align-items:center; justify-content:center;
+    transition:all 0.2s;
+  }
+  .check-item.checked .check-box { background:var(--success); border-color:var(--success); color:#fff; font-size:13px; }
+  .check-text { font-size:14px; font-weight:500; line-height:1.4; }
+  .check-item.checked .check-text { color:var(--muted); text-decoration:line-through; }
+
+  /* ===== CLIENTES ===== */
+  .search-bar {
+    padding:12px 20px;
+    position:relative;
+  }
+  .search-input {
+    width:100%; background:var(--surface);
+    border:1.5px solid var(--border); border-radius:var(--radius-sm);
+    color:var(--text); font-family:'Inter',sans-serif;
+    font-size:15px; font-weight:500; padding:12px 14px 12px 44px;
+    outline:none;
+  }
+  .search-input:focus { border-color:var(--fire); }
+  .search-icon { position:absolute; left:32px; top:50%; transform:translateY(-50%); font-size:18px; color:var(--muted); }
+  .client-card {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    margin:0 20px 10px;
+    display:flex; align-items:center; gap:14px;
+    cursor:pointer; transition:all 0.2s;
+  }
+  .client-card:active { transform:scale(0.98); }
+  .client-avatar {
+    width:46px; height:46px; border-radius:50%;
+    background:linear-gradient(135deg, var(--fire), var(--fire-dark));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-size:18px; font-weight:800;
+    color:#fff; flex-shrink:0;
+  }
+  .client-name { font-weight:700; font-size:15px; letter-spacing:-0.1px; }
+  .client-contact { font-size:12px; color:var(--muted); margin-top:2px; font-weight:500; }
+  .client-badge { font-size:11px; color:var(--muted); margin-top:3px; font-weight:500; }
+  .client-os-count {
+    background:var(--fire-glow); border:1px solid rgba(61,190,92,0.3);
+    color:var(--fire); font-size:11px; font-weight:700;
+    padding:4px 10px; border-radius:20px; margin-left:auto; flex-shrink:0;
+    font-family:'Outfit',sans-serif; letter-spacing:0.2px;
+  }
+
+  /* ===== FINANCEIRO ===== */
+  .finance-hero {
+    background:linear-gradient(135deg, #0A1A0A 0%, #081408 100%);
+    padding:20px; border-bottom:1px solid var(--border);
+  }
+  .finance-month { font-size:11px; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:1.5px; font-weight:700; font-family:'Outfit',sans-serif; }
+  .finance-total { font-family:'Outfit',sans-serif; font-size:36px; font-weight:800; color:var(--success); letter-spacing:-1px; line-height:1; }
+  .finance-sub { font-size:13px; color:var(--muted); margin-top:6px; font-weight:500; }
+  .finance-cards {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:10px; padding:16px 20px;
+  }
+  .fin-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:14px;
+  }
+  .fin-card-label { font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.8px; font-family:'Outfit',sans-serif; }
+  .fin-card-value { font-family:'Outfit',sans-serif; font-size:22px; font-weight:800; margin-top:6px; letter-spacing:-0.5px; line-height:1; }
+  .fin-card-value.red { color:var(--danger); }
+  .fin-card-value.green { color:var(--success); }
+  .fin-card-value.gold { color:var(--gold); }
+
+  .transaction-item {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:13px 16px;
+    margin:0 20px 8px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .tx-icon {
+    width:38px; height:38px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;
+  }
+  .tx-icon.entrada { background:rgba(46,204,113,0.12); }
+  .tx-icon.saida { background:rgba(231,76,60,0.12); }
+  .tx-info { flex:1; }
+  .tx-desc { font-size:14px; font-weight:600; letter-spacing:-0.1px; }
+  .tx-date { font-size:11px; color:var(--muted); margin-top:2px; font-weight:500; }
+  .tx-value { font-family:'Outfit',sans-serif; font-size:16px; font-weight:700; letter-spacing:-0.3px; }
+  .tx-value.entrada { color:var(--success); }
+  .tx-value.saida { color:var(--danger); }
+
+  /* ===== CONVERSÃO ===== */
+  .conv-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); margin:0 20px 12px; padding:16px;
+  }
+  .conv-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .conv-icon { font-size:24px; }
+  .conv-title { font-family:'Outfit',sans-serif; font-size:17px; font-weight:700; letter-spacing:-0.2px; }
+  .conv-sub { font-size:12px; color:var(--muted); font-weight:500; margin-top:1px; }
+  .conv-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+  .conv-row:last-child { border-bottom:none; }
+  .conv-key { font-size:13px; color:var(--muted); font-weight:500; }
+  .conv-val { font-size:13px; font-weight:700; letter-spacing:-0.1px; }
+  .conv-result {
+    background:rgba(61,190,92,0.08); border:1px solid rgba(61,190,92,0.25);
+    border-radius:var(--radius-sm); padding:14px; margin-top:10px; text-align:center;
+  }
+  .conv-result-label { font-size:11px; color:var(--muted); margin-bottom:5px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; font-family:'Outfit',sans-serif; }
+  .conv-result-value { font-family:'Outfit',sans-serif; font-size:22px; font-weight:800; color:var(--fire); letter-spacing:-0.5px; }
+
+  /* ===== CALCULADORAS ===== */
+  .calc-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:0 20px 16px; }
+  .calc-tile {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:18px 14px;
+    cursor:pointer; transition:all 0.2s;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .calc-tile:active { transform:scale(0.97); border-color:var(--fire); }
+  .calc-tile .ct-icon { font-size:26px; }
+  .calc-tile .ct-name { font-family:'Outfit',sans-serif; font-size:14px; font-weight:700; line-height:1.2; letter-spacing:-0.1px; }
+  .calc-tile .ct-desc { font-size:11px; color:var(--muted); font-weight:500; }
+
+  .calc-panel {
+    display:none; padding:0 20px 20px;
+  }
+  .calc-panel.active { display:block; }
+  .calc-result-box {
+    background:var(--surface); border:1.5px solid var(--fire);
+    border-radius:var(--radius-sm); padding:16px; text-align:center; margin-top:16px;
+  }
+  .calc-result-box .cr-label { font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; font-family:'Outfit',sans-serif; }
+  .calc-result-box .cr-value { font-family:'Outfit',sans-serif; font-size:28px; font-weight:800; color:var(--fire); letter-spacing:-0.8px; line-height:1; }
+  .calc-result-box .cr-unit { font-size:12px; color:var(--muted); margin-top:4px; font-weight:500; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position:fixed; inset:0; z-index:1000;
+    background:rgba(0,0,0,0.7); backdrop-filter:blur(4px);
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--surface); border-radius:24px 24px 0 0;
+    width:100%; max-width:430px;
+    max-height:90dvh; overflow-y:auto;
+    padding:0 0 env(safe-area-inset-bottom) 0;
+    animation:slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .modal-handle {
+    width:40px; height:4px; border-radius:2px;
+    background:var(--border); margin:12px auto 0;
+  }
+  .modal-header {
+    padding:16px 20px 12px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--border);
+  }
+  .modal-title { font-family:'Outfit',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.3px; }
+  .modal-close { font-size:22px; cursor:pointer; color:var(--muted); padding:4px; }
+  .modal-body { padding:20px; }
+
+  /* ===== AGENDA ===== */
+  .cal-header { padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
+  .cal-month { font-family:'Outfit',sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.3px; }
+  .cal-nav { display:flex; gap:8px; }
+  .cal-nav button {
+    width:34px; height:34px; border-radius:50%;
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--text); font-size:16px; cursor:pointer;
+  }
+  .cal-grid { padding:0 20px 10px; }
+  .cal-weekdays {
+    display:grid; grid-template-columns:repeat(7,1fr);
+    text-align:center; margin-bottom:8px;
+  }
+  .cal-weekday { font-size:11px; color:var(--muted); font-weight:700; padding:4px; }
+  .cal-days { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+  .cal-day {
+    aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    border-radius:50%; font-size:13px; cursor:pointer;
+    transition:all 0.15s;
+  }
+  .cal-day:empty { cursor:default; }
+  .cal-day:hover:not(:empty) { background:var(--surface); }
+  .cal-day.today { background:var(--fire); color:#fff; font-weight:700; }
+  .cal-day.has-event { position:relative; }
+  .cal-day.has-event::after {
+    content:''; position:absolute; bottom:2px;
+    width:4px; height:4px; border-radius:50%; background:var(--gold);
+  }
+  .cal-day.selected { border:2px solid var(--fire); }
+  .event-item {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:12px 16px;
+    margin:0 20px 8px;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .event-time { font-size:12px; color:var(--muted); font-weight:700; min-width:40px; padding-top:2px; font-family:'Outfit',sans-serif; }
+  .event-bar { width:3px; border-radius:2px; background:var(--fire); flex-shrink:0; min-height:36px; }
+  .event-title { font-size:14px; font-weight:700; letter-spacing:-0.1px; }
+  .event-client { font-size:12px; color:var(--muted); margin-top:2px; font-weight:500; }
+
+  /* ===== PERFIL ===== */
+  .profile-header {
+    background:linear-gradient(135deg, #0A1A0A, #111C11);
+    padding:24px 20px; text-align:center;
+    border-bottom:1px solid var(--border);
+  }
+  .profile-avatar-big {
+    width:80px; height:80px; border-radius:50%;
+    background:linear-gradient(135deg, var(--fire), var(--fire-dark));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Outfit',sans-serif; font-size:30px; font-weight:800; color:#fff;
+    margin:0 auto 12px;
+    border:3px solid var(--fire);
+    box-shadow: 0 0 24px rgba(61,190,92,0.45);
+    letter-spacing:-1px;
+  }
+  .profile-name { font-family:'Outfit',sans-serif; font-size:24px; font-weight:800; letter-spacing:-0.5px; }
+  .profile-role { font-size:13px; color:var(--fire); margin-top:3px; font-weight:600; letter-spacing:0.2px; }
+  .profile-reg { font-size:12px; color:var(--muted); margin-top:3px; font-weight:500; }
+  .profile-menu { padding:16px 20px; }
+  .pm-item {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:14px 16px;
+    display:flex; align-items:center; gap:12px;
+    margin-bottom:8px; cursor:pointer; transition:all 0.2s;
+  }
+  .pm-item:active { transform:scale(0.98); }
+  .pm-item .pm-icon { font-size:20px; width:28px; text-align:center; }
+  .pm-item .pm-label { font-size:15px; font-weight:500; flex:1; letter-spacing:-0.1px; }
+  .pm-item .pm-arrow { color:var(--muted); font-size:16px; }
+  .pm-section-title { font-size:10px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:1.5px; padding:8px 4px; margin-top:8px; font-family:'Outfit',sans-serif; }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--surface2); border:1px solid var(--border);
+    border-radius:12px; padding:11px 22px;
+    font-size:14px; font-weight:600; z-index:9000;
+    opacity:0; transition:all 0.3s; pointer-events:none;
+    white-space:nowrap; max-width:340px;
+    box-shadow: var(--shadow);
+    font-family:'Outfit',sans-serif; letter-spacing:0.1px;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast.success { border-color:rgba(46,204,113,0.4); color:var(--success); }
+  .toast.error { border-color:rgba(231,76,60,0.4); color:var(--danger); }
+
+  /* ===== FAB ===== */
+  .fab {
+    position:fixed; bottom:90px; right:20px;
+    width:52px; height:52px; border-radius:50%;
+    background:var(--fire); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px; cursor:pointer; z-index:200;
+    box-shadow:0 4px 20px rgba(61,190,92,0.5);
+    transition:all 0.2s;
+    border:none;
+  }
+  .fab:active { transform:scale(0.9); }
+
+  /* MISC */
+  .empty-state { text-align:center; padding:40px 20px; color:var(--muted); }
+  .empty-state .es-icon { font-size:48px; margin-bottom:12px; opacity:0.5; }
+  .empty-state .es-text { font-size:14px; }
+  .divider { height:1px; background:var(--border); margin:8px 20px; }
+  .tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
+  .tag-gn { background:rgba(52,152,219,0.15); color:var(--info); }
+  .tag-glp { background:rgba(240,180,41,0.15); color:var(--gold); }
+  .info-box {
+    background:rgba(52,152,219,0.08); border:1px solid rgba(52,152,219,0.2);
+    border-radius:var(--radius-sm); padding:12px 14px; margin:0 20px 12px;
+    font-size:12px; color:var(--info); line-height:1.5;
+  }
+
+  /* SCROLL SMOOTH */
+  .content { scroll-behavior:smooth; }
+  ::-webkit-scrollbar { width:0; }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-flame"></div>
+  <div class="splash-title">PEIXOTO <span style="color:var(--fire)">Pro</span></div>
+  <div class="splash-sub">Téc. Gasista · Residencial e Comercial</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">PEIXO<span>TO</span></div>
+    <div class="topbar-right">
+      <div class="icon-btn-wrap">
+        <div class="icon-btn" onclick="showNotifications()">🔔</div>
+        <div class="badge" id="notif-badge" style="display:none">3</div>
+      </div>
+      <div class="icon-btn" onclick="navigate('perfil')">👤</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content" id="main-content">
+
+    <!-- ===== HOME PAGE ===== -->
+    <div class="page active" id="page-home">
+      <div class="home-hero">
+        <div class="greeting">Bom dia, Técnico 👋</div>
+        <div class="user-name" id="hero-name">Peixoto</div>
+        <div class="status-pill"><div class="status-dot"></div> Em Operação</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card orange">
+          <div class="stat-num orange" id="stat-hoje">0</div>
+          <div class="stat-label">OS Hoje</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-num green" id="stat-mes">0</div>
+          <div class="stat-label">Concluídas Mês</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-num gold" id="stat-receber">R$0</div>
+          <div class="stat-label">A Receber</div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        Ordens do Dia
+        <a href="#" onclick="navigate('os'); return false;">Ver todas →</a>
+      </div>
+      <div class="os-list" id="home-os-list">
+        <div class="empty-state"><div class="es-icon">📋</div><div class="es-text">Nenhuma OS para hoje</div></div>
+      </div>
+
+      <div class="section-title">Ações Rápidas</div>
+      <div class="quick-grid">
+        <div class="quick-card primary" onclick="openModal('modal-nova-os')">
+          <div class="qc-icon">➕</div>
+          <div class="qc-title">Nova Ordem</div>
+          <div class="qc-sub">Criar OS</div>
+        </div>
+        <div class="quick-card" onclick="navigate('calculadoras')">
+          <div class="qc-icon">🧮</div>
+          <div class="qc-title">Calculadoras</div>
+          <div class="qc-sub">Técnicas</div>
+        </div>
+        <div class="quick-card" onclick="navigate('conversao')">
+          <div class="qc-icon">🔄</div>
+          <div class="qc-title">Conversão</div>
+          <div class="qc-sub">GLP ↔ GN</div>
+        </div>
+        <div class="quick-card" onclick="navigate('checklist')">
+          <div class="qc-icon">✅</div>
+          <div class="qc-title">Checklist</div>
+          <div class="qc-sub">Segurança</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== OS PAGE ===== -->
+    <div class="page" id="page-os">
+      <div class="filter-tabs">
+        <div class="filter-tab active" onclick="filterOS('todas', this)">Todas</div>
+        <div class="filter-tab" onclick="filterOS('pendente', this)">Pendentes</div>
+        <div class="filter-tab" onclick="filterOS('andamento', this)">Em Andamento</div>
+        <div class="filter-tab" onclick="filterOS('concluida', this)">Concluídas</div>
+        <div class="filter-tab" onclick="filterOS('agendada', this)">Agendadas</div>
+      </div>
+      <div class="os-list" id="os-list-full">
+        <div class="empty-state"><div class="es-icon">📋</div><div class="es-text">Nenhuma OS encontrada</div></div>
+      </div>
+    </div>
+
+    <!-- ===== CLIENTES PAGE ===== -->
+    <div class="page" id="page-clientes">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" placeholder="Buscar cliente..." oninput="searchClients(this.value)" id="client-search">
+      </div>
+      <div id="client-list">
+        <div class="empty-state"><div class="es-icon">👥</div><div class="es-text">Nenhum cliente cadastrado</div></div>
+      </div>
+    </div>
+
+    <!-- ===== FINANCEIRO PAGE ===== -->
+    <div class="page" id="page-financeiro">
+      <div class="finance-hero">
+        <div class="finance-month" id="fin-month">Maio 2025</div>
+        <div class="finance-total" id="fin-total">R$ 0,00</div>
+        <div class="finance-sub">Receita do mês</div>
+      </div>
+      <div class="finance-cards">
+        <div class="fin-card">
+          <div class="fin-card-label">Entradas</div>
+          <div class="fin-card-value green" id="fin-entradas">R$ 0</div>
+        </div>
+        <div class="fin-card">
+          <div class="fin-card-label">Saídas</div>
+          <div class="fin-card-value red" id="fin-saidas">R$ 0</div>
+        </div>
+        <div class="fin-card">
+          <div class="fin-card-label">A Receber</div>
+          <div class="fin-card-value gold" id="fin-receber">R$ 0</div>
+        </div>
+        <div class="fin-card">
+          <div class="fin-card-label">OS no mês</div>
+          <div class="fin-card-value" id="fin-os-mes">0</div>
+        </div>
+      </div>
+      <div class="section-title">Lançamentos</div>
+      <div id="transaction-list">
+        <div class="empty-state"><div class="es-icon">💰</div><div class="es-text">Nenhum lançamento ainda</div></div>
+      </div>
+    </div>
+
+    <!-- ===== AGENDA PAGE ===== -->
+    <div class="page" id="page-agenda">
+      <div class="cal-header">
+        <div class="cal-month" id="cal-month-title">Maio 2025</div>
+        <div class="cal-nav">
+          <button onclick="changeMonth(-1)">‹</button>
+          <button onclick="changeMonth(1)">›</button>
+        </div>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-weekdays">
+          <div class="cal-weekday">D</div><div class="cal-weekday">S</div>
+          <div class="cal-weekday">T</div><div class="cal-weekday">Q</div>
+          <div class="cal-weekday">Q</div><div class="cal-weekday">S</div>
+          <div class="cal-weekday">S</div>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-title">Compromissos do dia</div>
+      <div id="agenda-events">
+        <div class="empty-state"><div class="es-icon">📅</div><div class="es-text">Selecione um dia</div></div>
+      </div>
+    </div>
+
+    <!-- ===== CHECKLIST PAGE ===== -->
+    <div class="page" id="page-checklist">
+      <div class="filter-tabs">
+        <div class="filter-tab active" onclick="switchChecklist('instalacao', this)">Instalação</div>
+        <div class="filter-tab" onclick="switchChecklist('conversao', this)">Conversão Fogão</div>
+        <div class="filter-tab" onclick="switchChecklist('vistoria', this)">Vistoria</div>
+      </div>
+      <div id="checklist-content"></div>
+    </div>
+
+    <!-- ===== CALCULADORAS PAGE ===== -->
+    <div class="page" id="page-calculadoras">
+      <div style="padding:14px 20px 0">
+        <div class="info-box">⚙️ Calculadoras técnicas para dimensionamento e projetos de instalações a gás.</div>
+      </div>
+      <div class="calc-grid">
+        <div class="calc-tile" onclick="openCalc('tubulacao')">
+          <div class="ct-icon">🔧</div>
+          <div class="ct-name">Diâmetro Tubulação</div>
+          <div class="ct-desc">GN e GLP</div>
+        </div>
+        <div class="calc-tile" onclick="openCalc('consumo')">
+          <div class="ct-icon">🔥</div>
+          <div class="ct-name">Consumo Aparelhos</div>
+          <div class="ct-desc">Vazão m³/h</div>
+        </div>
+        <div class="calc-tile" onclick="openCalc('pressao')">
+          <div class="ct-icon">📊</div>
+          <div class="ct-name">Queda de Pressão</div>
+          <div class="ct-desc">Rede de distribuição</div>
+        </div>
+        <div class="calc-tile" onclick="openCalc('regulador')">
+          <div class="ct-icon">⚡</div>
+          <div class="ct-name">Regulador</div>
+          <div class="ct-desc">Capacidade válvula</div>
+        </div>
+        <div class="calc-tile" onclick="openCalc('botijao')">
+          <div class="ct-icon">🏮</div>
+          <div class="ct-name">Autonomia GLP</div>
+          <div class="ct-desc">Botijão/Cilindro</div>
+        </div>
+        <div class="calc-tile" onclick="openCalc('orcamento')">
+          <div class="ct-icon">💰</div>
+          <div class="ct-name">Orçamento Rápido</div>
+          <div class="ct-desc">Estimativa serviço</div>
+        </div>
+      </div>
+      <div id="calc-panels">
+
+        <!-- TUBULAÇÃO -->
+        <div class="calc-panel" id="calc-tubulacao">
+          <div class="section-title" style="padding:0 0 12px">Diâmetro de Tubulação</div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Gás</label>
+            <select class="form-control" id="ct-tipo">
+              <option value="gn">Gás Natural (GN)</option>
+              <option value="glp">GLP – Botijão/Reservatório</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Vazão Total (m³/h)</label>
+              <input type="number" class="form-control" id="ct-vazao" placeholder="Ex: 2.5">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Comprimento (m)</label>
+              <input type="number" class="form-control" id="ct-comprimento" placeholder="Ex: 15">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="calcTubulacao()">Calcular</button>
+          <div class="calc-result-box" id="res-tubulacao" style="display:none">
+            <div class="cr-label">Diâmetro Nominal Recomendado</div>
+            <div class="cr-value" id="res-tub-val">—</div>
+            <div class="cr-unit" id="res-tub-detail"></div>
+          </div>
+        </div>
+
+        <!-- CONSUMO -->
+        <div class="calc-panel" id="calc-consumo">
+          <div class="section-title" style="padding:0 0 12px">Consumo de Aparelhos</div>
+          <div class="info-box">Marque os aparelhos instalados para calcular a vazão total necessária.</div>
+          <div id="aparelhos-list"></div>
+          <button class="btn btn-primary" style="margin-top:8px" onclick="calcConsumo()">Calcular Vazão Total</button>
+          <div class="calc-result-box" id="res-consumo" style="display:none">
+            <div class="cr-label">Vazão Total Necessária</div>
+            <div class="cr-value" id="res-cons-val">—</div>
+            <div class="cr-unit">m³/h</div>
+          </div>
+        </div>
+
+        <!-- PRESSÃO -->
+        <div class="calc-panel" id="calc-pressao">
+          <div class="section-title" style="padding:0 0 12px">Queda de Pressão</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Vazão (m³/h)</label>
+              <input type="number" class="form-control" id="cp-vazao" placeholder="2.0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Comprimento (m)</label>
+              <input type="number" class="form-control" id="cp-comp" placeholder="20">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Diâmetro Interno (mm)</label>
+              <input type="number" class="form-control" id="cp-diam" placeholder="22">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipo Gás</label>
+              <select class="form-control" id="cp-tipo">
+                <option value="gn">GN</option>
+                <option value="glp">GLP</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="calcPressao()">Calcular</button>
+          <div class="calc-result-box" id="res-pressao" style="display:none">
+            <div class="cr-label">Queda de Pressão Estimada</div>
+            <div class="cr-value" id="res-pres-val">—</div>
+            <div class="cr-unit" id="res-pres-detail"></div>
+          </div>
+        </div>
+
+        <!-- BOTIJÃO -->
+        <div class="calc-panel" id="calc-botijao">
+          <div class="section-title" style="padding:0 0 12px">Autonomia GLP</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Peso do botijão (kg)</label>
+              <select class="form-control" id="cb-peso">
+                <option value="13">P-13 (13 kg)</option>
+                <option value="45">P-45 (45 kg)</option>
+                <option value="90">P-90 (90 kg)</option>
+                <option value="190">P-190 (190 kg)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Consumo total (m³/h)</label>
+              <input type="number" class="form-control" id="cb-consumo" placeholder="0.5">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Horas uso/dia</label>
+            <input type="number" class="form-control" id="cb-horas" placeholder="2" value="2">
+          </div>
+          <button class="btn btn-primary" onclick="calcBotijao()">Calcular Autonomia</button>
+          <div class="calc-result-box" id="res-botijao" style="display:none">
+            <div class="cr-label">Autonomia Estimada</div>
+            <div class="cr-value" id="res-bot-val">—</div>
+            <div class="cr-unit" id="res-bot-detail"></div>
+          </div>
+        </div>
+
+        <!-- REGULADOR -->
+        <div class="calc-panel" id="calc-regulador">
+          <div class="section-title" style="padding:0 0 12px">Capacidade do Regulador</div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Regulador</label>
+            <select class="form-control" id="cr-tipo">
+              <option value="1a">1ª Fase (Alta → Média)</option>
+              <option value="2a">2ª Fase (Média → Baixa)</option>
+              <option value="mono">Monorregulador</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vazão necessária (m³/h)</label>
+            <input type="number" class="form-control" id="cr-vazao" placeholder="1.5">
+          </div>
+          <button class="btn btn-primary" onclick="calcRegulador()">Recomendar Regulador</button>
+          <div class="calc-result-box" id="res-regulador" style="display:none">
+            <div class="cr-label">Regulador Recomendado</div>
+            <div class="cr-value" id="res-reg-val">—</div>
+            <div class="cr-unit" id="res-reg-detail"></div>
+          </div>
+        </div>
+
+        <!-- ORÇAMENTO -->
+        <div class="calc-panel" id="calc-orcamento">
+          <div class="section-title" style="padding:0 0 12px">Orçamento Rápido</div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Serviço</label>
+            <select class="form-control" id="co-tipo">
+              <option value="instalacao_simples">Instalação Simples</option>
+              <option value="instalacao_completa">Instalação Completa</option>
+              <option value="conversao_fogao">Conversão de Fogão</option>
+              <option value="manutencao">Manutenção</option>
+              <option value="vistoria">Vistoria Técnica</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Metros de tubo</label>
+              <input type="number" class="form-control" id="co-metros" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Qtd conexões</label>
+              <input type="number" class="form-control" id="co-conexoes" placeholder="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hora trabalhada (R$)</label>
+            <input type="number" class="form-control" id="co-hora" placeholder="80">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Horas previstas</label>
+            <input type="number" class="form-control" id="co-horas" placeholder="4">
+          </div>
+          <button class="btn btn-primary" onclick="calcOrcamento()">Gerar Estimativa</button>
+          <div class="calc-result-box" id="res-orcamento" style="display:none">
+            <div class="cr-label">Valor Estimado do Serviço</div>
+            <div class="cr-value" id="res-orc-val">—</div>
+            <div class="cr-unit" id="res-orc-detail"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== CONVERSÃO PAGE ===== -->
+    <div class="page" id="page-conversao">
+      <div style="padding:14px 20px 10px">
+        <div class="info-box">🔄 Referências técnicas para conversão de fogões entre GLP e Gás Natural (GN).</div>
+      </div>
+
+      <div class="conv-card">
+        <div class="conv-header">
+          <div class="conv-icon">🏮</div>
+          <div><div class="conv-title">GLP <tag class="tag tag-glp">GLP</tag></div><div class="conv-sub">Gás Liquefeito de Petróleo</div></div>
+        </div>
+        <div class="conv-row"><div class="conv-key">Pressão de trabalho</div><div class="conv-val">2,8 kPa</div></div>
+        <div class="conv-row"><div class="conv-key">PCS Médio</div><div class="conv-val">12.760 kcal/m³</div></div>
+        <div class="conv-row"><div class="conv-key">Bico padrão fogão</div><div class="conv-val">0,80 – 1,00 mm</div></div>
+        <div class="conv-row"><div class="conv-key">Temperatura chama</div><div class="conv-val">~1.980 °C</div></div>
+        <div class="conv-row"><div class="conv-key">Densidade relativa</div><div class="conv-val">1,55 (mais pesado que ar)</div></div>
+      </div>
+
+      <div class="conv-card">
+        <div class="conv-header">
+          <div class="conv-icon">🔵</div>
+          <div><div class="conv-title">Gás Natural <tag class="tag tag-gn">GN</tag></div><div class="conv-sub">Fornecido pela distribuidora</div></div>
+        </div>
+        <div class="conv-row"><div class="conv-key">Pressão de trabalho</div><div class="conv-val">1,0 – 2,0 kPa</div></div>
+        <div class="conv-row"><div class="conv-key">PCS Médio</div><div class="conv-val">9.400 kcal/m³</div></div>
+        <div class="conv-row"><div class="conv-key">Bico padrão fogão</div><div class="conv-val">1,20 – 1,50 mm</div></div>
+        <div class="conv-row"><div class="conv-key">Temperatura chama</div><div class="conv-val">~1.960 °C</div></div>
+        <div class="conv-row"><div class="conv-key">Densidade relativa</div><div class="conv-val">0,55 (mais leve que ar)</div></div>
+      </div>
+
+      <div class="conv-card">
+        <div class="conv-header">
+          <div class="conv-icon">⚙️</div>
+          <div><div class="conv-title">Procedimento de Conversão</div><div class="conv-sub">Fogão de 4/5 bocas – GLP → GN</div></div>
+        </div>
+        <div class="conv-row"><div class="conv-key">1. Desligamento</div><div class="conv-val">Fechar registro principal</div></div>
+        <div class="conv-row"><div class="conv-key">2. Bicos queimadores</div><div class="conv-val">Substituir por bicos GN maiores</div></div>
+        <div class="conv-row"><div class="conv-key">3. Regulagem</div><div class="conv-val">Ajuste do ar primário</div></div>
+        <div class="conv-row"><div class="conv-key">4. Teste estanqueidade</div><div class="conv-val">Detecção de vazamentos</div></div>
+        <div class="conv-row"><div class="conv-key">5. Teste de chama</div><div class="conv-val">Cor azul estável</div></div>
+        <div class="conv-row"><div class="conv-key">6. Plaqueta</div><div class="conv-val">Afixar identificação GN</div></div>
+      </div>
+
+      <div class="section-title">Calcular Bico Equivalente</div>
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Bico original (mm)</label>
+            <input type="number" class="form-control" id="bico-original" placeholder="0.90" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Converter de</label>
+            <select class="form-control" id="bico-de">
+              <option value="glp-gn">GLP → GN</option>
+              <option value="gn-glp">GN → GLP</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="calcBico()">Calcular Bico</button>
+        <div class="calc-result-box" id="res-bico" style="display:none;margin-top:14px">
+          <div class="cr-label">Bico Equivalente</div>
+          <div class="cr-value" id="res-bico-val">—</div>
+          <div class="cr-unit" id="res-bico-detail">mm</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PERFIL PAGE ===== -->
+    <div class="page" id="page-perfil">
+      <div class="profile-header">
+        <div class="profile-avatar-big" id="profile-avatar">PX</div>
+        <div class="profile-name" id="profile-name">Peixoto</div>
+        <div class="profile-role">🔥 Téc. Gasista · Res. e Comercial</div>
+        <div class="profile-reg" id="profile-reg">82-98716-0211</div>
+      </div>
+      <div class="profile-menu">
+        <div class="pm-section-title">Minha Conta</div>
+        <div class="pm-item" onclick="openModal('modal-perfil-edit')">
+          <div class="pm-icon">✏️</div><div class="pm-label">Editar Perfil</div><div class="pm-arrow">›</div>
+        </div>
+        <div class="pm-item" onclick="openModal('modal-precos')">
+          <div class="pm-icon">💲</div><div class="pm-label">Tabela de Preços</div><div class="pm-arrow">›</div>
+        </div>
+        <div class="pm-section-title">Ferramentas</div>
+        <div class="pm-item" onclick="navigate('conversao')">
+          <div class="pm-icon">🔄</div><div class="pm-label">Tabela de Conversão</div><div class="pm-arrow">›</div>
+        </div>
+        <div class="pm-item" onclick="navigate('checklist')">
+          <div class="pm-icon">✅</div><div class="pm-label">Checklists de Segurança</div><div class="pm-arrow">›</div>
+        </div>
+        <div class="pm-item" onclick="exportData()">
+          <div class="pm-icon">📤</div><div class="pm-label">Exportar Dados</div><div class="pm-arrow">›</div>
+        </div>
+        <div class="pm-section-title">Sobre</div>
+        <div class="pm-item">
+          <div class="pm-icon">ℹ️</div><div class="pm-label">Peixoto Gasista Pro v1.0</div><div class="pm-arrow"></div>
+        </div>
+        <div class="pm-item" onclick="clearData()">
+          <div class="pm-icon">🗑️</div><div class="pm-label" style="color:var(--danger)">Limpar Todos os Dados</div><div class="pm-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="navigate('home')" id="nav-home">
+      <div class="nav-icon">🏠</div><div class="nav-label">Início</div>
+    </div>
+    <div class="nav-item" onclick="navigate('os')" id="nav-os">
+      <div class="nav-icon">📋</div><div class="nav-label">Ordens</div>
+    </div>
+    <div class="nav-item" onclick="navigate('clientes')" id="nav-clientes">
+      <div class="nav-icon">👥</div><div class="nav-label">Clientes</div>
+    </div>
+    <div class="nav-item" onclick="navigate('financeiro')" id="nav-financeiro">
+      <div class="nav-icon">💰</div><div class="nav-label">Financeiro</div>
+    </div>
+    <div class="nav-item" onclick="navigate('agenda')" id="nav-agenda">
+      <div class="nav-icon">📅</div><div class="nav-label">Agenda</div>
+    </div>
+  </nav>
+
+  <!-- FAB -->
+  <button class="fab" id="fab-btn" onclick="handleFab()">+</button>
+
+</div><!-- end app -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- NOVA OS -->
+<div class="modal-overlay" id="modal-nova-os">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Nova Ordem de Serviço</div>
+      <div class="modal-close" onclick="closeModal('modal-nova-os')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Cliente</label>
+        <select class="form-control" id="os-cliente-sel">
+          <option value="">Selecionar cliente...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo de Serviço</label>
+        <select class="form-control" id="os-tipo">
+          <option value="instalacao">🔧 Instalação Residencial</option>
+          <option value="conversao">🔄 Conversão de Fogão</option>
+          <option value="manutencao">🛠️ Manutenção</option>
+          <option value="vistoria">🔍 Vistoria Técnica</option>
+          <option value="troca">🔁 Troca de Aparelhos</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo de Gás</label>
+        <select class="form-control" id="os-gas">
+          <option value="GLP">GLP – Botijão</option>
+          <option value="GN">Gás Natural (GN)</option>
+          <option value="ambos">Ambos</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Data</label>
+          <input type="date" class="form-control" id="os-data">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora</label>
+          <input type="time" class="form-control" id="os-hora">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Endereço do Serviço</label>
+        <input type="text" class="form-control" id="os-endereco" placeholder="Rua, nº, bairro">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor do Serviço (R$)</label>
+        <input type="number" class="form-control" id="os-valor" placeholder="0,00">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-control" id="os-status-sel">
+          <option value="agendada">Agendada</option>
+          <option value="pendente">Pendente</option>
+          <option value="andamento">Em Andamento</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea class="form-control" id="os-obs" placeholder="Detalhes, materiais necessários..."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="salvarOS()">✅ Salvar Ordem de Serviço</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOVO CLIENTE -->
+<div class="modal-overlay" id="modal-novo-cliente">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Novo Cliente</div>
+      <div class="modal-close" onclick="closeModal('modal-novo-cliente')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nome Completo</label>
+        <input type="text" class="form-control" id="cl-nome" placeholder="Nome do cliente">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input type="tel" class="form-control" id="cl-tel" placeholder="(82) 9 9999-9999">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CPF/CNPJ</label>
+          <input type="text" class="form-control" id="cl-doc" placeholder="Opcional">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" class="form-control" id="cl-email" placeholder="email@exemplo.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Endereço</label>
+        <input type="text" class="form-control" id="cl-end" placeholder="Rua, nº, bairro, cidade">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo de Instalação</label>
+        <select class="form-control" id="cl-instalacao">
+          <option value="GLP">GLP – Botijão</option>
+          <option value="GN">Gás Natural (GN)</option>
+          <option value="ambos">Ambos</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea class="form-control" id="cl-obs" placeholder="Informações adicionais..."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="salvarCliente()">✅ Salvar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- OS DETAIL -->
+<div class="modal-overlay" id="modal-os-detalhe">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Detalhes da OS</div>
+      <div class="modal-close" onclick="closeModal('modal-os-detalhe')">✕</div>
+    </div>
+    <div class="modal-body" id="os-detalhe-content"></div>
+  </div>
+</div>
+
+<!-- NOVO LANÇAMENTO -->
+<div class="modal-overlay" id="modal-lancamento">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Novo Lançamento</div>
+      <div class="modal-close" onclick="closeModal('modal-lancamento')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-control" id="tx-tipo">
+          <option value="entrada">💚 Entrada (Receita)</option>
+          <option value="saida">🔴 Saída (Despesa)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <input type="text" class="form-control" id="tx-desc" placeholder="Ex: Serviço de instalação">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Valor (R$)</label>
+          <input type="number" class="form-control" id="tx-valor" placeholder="0,00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data</label>
+          <input type="date" class="form-control" id="tx-data">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select class="form-control" id="tx-cat">
+          <option value="servico">Serviço</option>
+          <option value="material">Material/Peças</option>
+          <option value="ferramentas">Ferramentas</option>
+          <option value="combustivel">Combustível</option>
+          <option value="outros">Outros</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="salvarLancamento()">✅ Salvar Lançamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- PERFIL EDIT -->
+<div class="modal-overlay" id="modal-perfil-edit">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Editar Perfil</div>
+      <div class="modal-close" onclick="closeModal('modal-perfil-edit')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nome Completo</label>
+        <input type="text" class="form-control" id="pf-nome" placeholder="Seu nome">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Registro CRG</label>
+          <input type="text" class="form-control" id="pf-crg" placeholder="CRG-00000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CREA / CFT</label>
+          <input type="text" class="form-control" id="pf-crea" placeholder="0000000-0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefone</label>
+        <input type="tel" class="form-control" id="pf-tel" placeholder="(82) 9 9999-9999">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cidade / Estado</label>
+        <input type="text" class="form-control" id="pf-cidade" placeholder="Maceió, AL">
+      </div>
+      <button class="btn btn-primary" onclick="salvarPerfil()">✅ Salvar Perfil</button>
+    </div>
+  </div>
+</div>
+
+<!-- PREÇOS -->
+<div class="modal-overlay" id="modal-precos">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Tabela de Preços</div>
+      <div class="modal-close" onclick="closeModal('modal-precos')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="info-box">Configure seus preços padrão para geração de orçamentos.</div>
+      <div class="form-group"><label class="form-label">Instalação Simples (R$)</label><input type="number" class="form-control" id="pr-inst-simples" placeholder="150"></div>
+      <div class="form-group"><label class="form-label">Instalação Completa (R$)</label><input type="number" class="form-control" id="pr-inst-completa" placeholder="350"></div>
+      <div class="form-group"><label class="form-label">Conversão de Fogão (R$)</label><input type="number" class="form-control" id="pr-conversao" placeholder="120"></div>
+      <div class="form-group"><label class="form-label">Manutenção (R$)</label><input type="number" class="form-control" id="pr-manutencao" placeholder="80"></div>
+      <div class="form-group"><label class="form-label">Vistoria Técnica (R$)</label><input type="number" class="form-control" id="pr-vistoria" placeholder="60"></div>
+      <div class="form-group"><label class="form-label">Metro de Tubo Instalado (R$)</label><input type="number" class="form-control" id="pr-metro" placeholder="25"></div>
+      <div class="form-group"><label class="form-label">Hora de Trabalho (R$)</label><input type="number" class="form-control" id="pr-hora" placeholder="80"></div>
+      <button class="btn btn-primary" onclick="salvarPrecos()">✅ Salvar Tabela</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== INDEXEDDB ==========
+let db;
+const DB_NAME = 'GasistaProDB';
+const DB_VERSION = 1;
+
+function initDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => { db = req.result; resolve(); };
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('os')) {
+        const os = d.createObjectStore('os', { keyPath: 'id', autoIncrement: true });
+        os.createIndex('status', 'status'); os.createIndex('data', 'data');
+      }
+      if (!d.objectStoreNames.contains('clientes')) {
+        const cl = d.createObjectStore('clientes', { keyPath: 'id', autoIncrement: true });
+        cl.createIndex('nome', 'nome');
+      }
+      if (!d.objectStoreNames.contains('financeiro')) {
+        d.createObjectStore('financeiro', { keyPath: 'id', autoIncrement: true });
+      }
+      if (!d.objectStoreNames.contains('config')) {
+        d.createObjectStore('config', { keyPath: 'key' });
+      }
+    };
+  });
+}
+
+function dbGet(store, id) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).get(id);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function dbGetAll(store) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function dbPut(store, data) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).put(data);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function dbAdd(store, data) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).add(data);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function dbDelete(store, id) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).delete(id);
+    req.onsuccess = () => res();
+    req.onerror = () => rej(req.error);
+  });
+}
+
+// ========== NAVIGATION ==========
+const pages = ['home','os','clientes','financeiro','agenda','checklist','calculadoras','conversao','perfil'];
+const navPages = ['home','os','clientes','financeiro','agenda'];
+const pageTitles = {
+  home:'Início', os:'Ordens de Serviço', clientes:'Clientes',
+  financeiro:'Financeiro', agenda:'Agenda',
+  checklist:'Checklist de Segurança', calculadoras:'Calculadoras Técnicas',
+  conversao:'Conversão GLP/GN', perfil:'Meu Perfil'
+};
+const fabActions = {
+  home:()=>openModal('modal-nova-os'),
+  os:()=>openModal('modal-nova-os'),
+  clientes:()=>openModal('modal-novo-cliente'),
+  financeiro:()=>openModal('modal-lancamento'),
+  agenda:()=>openModal('modal-nova-os'),
+  checklist:null, calculadoras:null, conversao:null, perfil:null
+};
+let currentPage = 'home';
+
+function navigate(page) {
+  currentPage = page;
+  pages.forEach(p => {
+    document.getElementById('page-'+p)?.classList.toggle('active', p===page);
+  });
+  navPages.forEach(p => {
+    document.getElementById('nav-'+p)?.classList.toggle('active', p===page);
+  });
+  if (page === 'home') {
+    document.getElementById('topbar-title').innerHTML = 'PEIXO<span style="color:var(--fire)">TO</span>';
+  } else {
+    document.getElementById('topbar-title').textContent = pageTitles[page]||page;
+  }
+  const fab = document.getElementById('fab-btn');
+  fab.style.display = fabActions[page] !== undefined && fabActions[page] !== null ? 'flex' : 'none';
+  if (page === 'home') loadHome();
+  if (page === 'os') loadOSList();
+  if (page === 'clientes') loadClients();
+  if (page === 'financeiro') loadFinanceiro();
+  if (page === 'agenda') renderCalendar();
+  if (page === 'checklist') renderChecklist('instalacao');
+  if (page === 'calculadoras') renderAparelhos();
+  document.getElementById('main-content').scrollTop = 0;
+}
+
+function handleFab() {
+  if (fabActions[currentPage]) fabActions[currentPage]();
+}
+
+// ========== TOAST ==========
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast '+type+' show';
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ========== MODALS ==========
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if (id==='modal-nova-os') populateClienteSelect();
+  if (id==='modal-perfil-edit') loadPerfilForm();
+  if (id==='modal-precos') loadPrecosForm();
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ========== HOME ==========
+async function loadHome() {
+  const [allOS, allTx] = await Promise.all([dbGetAll('os'), dbGetAll('financeiro')]);
+  const today = new Date().toISOString().split('T')[0];
+  const osHoje = allOS.filter(o => o.data === today).length;
+  const osMes = allOS.filter(o => {
+    const d = new Date(o.data); const now = new Date();
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear() && o.status==='concluida';
+  }).length;
+  const aReceber = allOS.filter(o=>o.status!=='concluida' && o.valor).reduce((s,o)=>s+(parseFloat(o.valor)||0),0);
+  document.getElementById('stat-hoje').textContent = osHoje;
+  document.getElementById('stat-mes').textContent = osMes;
+  document.getElementById('stat-receber').textContent = 'R$'+aReceber.toFixed(0);
+
+  const todayOS = allOS.filter(o => o.data === today).sort((a,b)=>a.hora?.localeCompare(b.hora||'')||0);
+  const cont = document.getElementById('home-os-list');
+  if (!todayOS.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="es-icon">☀️</div><div class="es-text">Nenhuma OS para hoje</div></div>';
+  } else {
+    cont.innerHTML = todayOS.slice(0,4).map(os=>renderOSCard(os)).join('');
+  }
+
+  const cfg = await dbGet('config','perfil');
+  if (cfg) {
+    document.getElementById('hero-name').textContent = cfg.value.nome||'Peixoto';
+  }
+}
+
+function renderOSCard(os) {
+  const icons = { instalacao:'🔧', conversao:'🔄', manutencao:'🛠️', vistoria:'🔍', troca:'🔁' };
+  return `<div class="os-card" onclick="openOSDetail(${os.id})">
+    <div class="os-icon ${os.tipo}"><span>${icons[os.tipo]||'📋'}</span></div>
+    <div class="os-info">
+      <div class="os-client">${os.clienteNome||'Cliente não definido'}</div>
+      <div class="os-type">${tipoLabel(os.tipo)} · ${os.gas||''}</div>
+    </div>
+    <div class="os-meta">
+      <div class="os-time">${os.hora||'–'}</div>
+      <div class="os-status ${os.status}">${statusLabel(os.status)}</div>
+    </div>
+  </div>`;
+}
+
+function tipoLabel(t) {
+  return {instalacao:'Instalação',conversao:'Conversão',manutencao:'Manutenção',vistoria:'Vistoria',troca:'Troca'}[t]||t;
+}
+function statusLabel(s) {
+  return {pendente:'Pendente',andamento:'Andamento',concluida:'Concluída',agendada:'Agendada'}[s]||s;
+}
+
+// ========== OS ==========
+let osFilter = 'todas';
+async function loadOSList(filter) {
+  const all = await dbGetAll('os');
+  const f = filter || osFilter;
+  const list = f==='todas' ? all : all.filter(o=>o.status===f);
+  list.sort((a,b)=>(b.id-a.id));
+  const cont = document.getElementById('os-list-full');
+  if (!list.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><div class="es-text">Nenhuma OS encontrada</div></div>';
+  } else {
+    cont.innerHTML = list.map(os=>renderOSCard(os)).join('');
+  }
+}
+
+function filterOS(f, el) {
+  osFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  loadOSList(f);
+}
+
+async function populateClienteSelect() {
+  const clientes = await dbGetAll('clientes');
+  const sel = document.getElementById('os-cliente-sel');
+  sel.innerHTML = '<option value="">Selecionar cliente...</option>' +
+    clientes.map(c=>`<option value="${c.id}" data-nome="${c.nome}">${c.nome}</option>`).join('');
+  // defaults
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date(); const hh = String(now.getHours()).padStart(2,'0'); const mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('os-data').value = today;
+  document.getElementById('os-hora').value = hh+':'+mm;
+}
+
+async function salvarOS() {
+  const sel = document.getElementById('os-cliente-sel');
+  const clienteId = parseInt(sel.value)||null;
+  const clienteNome = sel.options[sel.selectedIndex]?.dataset.nome||'';
+  const data = {
+    clienteId, clienteNome,
+    tipo: document.getElementById('os-tipo').value,
+    gas: document.getElementById('os-gas').value,
+    data: document.getElementById('os-data').value,
+    hora: document.getElementById('os-hora').value,
+    endereco: document.getElementById('os-endereco').value,
+    valor: parseFloat(document.getElementById('os-valor').value)||0,
+    status: document.getElementById('os-status-sel').value,
+    obs: document.getElementById('os-obs').value,
+    criadaEm: new Date().toISOString()
+  };
+  if (!data.data) { showToast('Informe a data da OS','error'); return; }
+  await dbAdd('os', data);
+  closeModal('modal-nova-os');
+  showToast('✅ OS criada com sucesso!');
+  // reset
+  ['os-cliente-sel','os-endereco','os-obs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('os-valor').value='';
+  loadOSList(); loadHome();
+}
+
+async function openOSDetail(id) {
+  const os = await dbGet('os', id);
+  if (!os) return;
+  const cont = document.getElementById('os-detalhe-content');
+  const statusOpts = ['pendente','andamento','concluida','agendada'].map(s=>
+    `<option value="${s}" ${os.status===s?'selected':''}>${statusLabel(s)}</option>`).join('');
+  cont.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+      <div>
+        <div style="font-size:20px;font-weight:700;font-family:'Syne',sans-serif">${os.clienteNome||'S/ cliente'}</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:2px">${tipoLabel(os.tipo)} · ${os.gas}</div>
+      </div>
+      <div class="os-status ${os.status}">${statusLabel(os.status)}</div>
+    </div>
+    <div class="conv-row"><div class="conv-key">📅 Data</div><div class="conv-val">${formatDate(os.data)} ${os.hora?'às '+os.hora:''}</div></div>
+    <div class="conv-row"><div class="conv-key">📍 Endereço</div><div class="conv-val">${os.endereco||'—'}</div></div>
+    <div class="conv-row"><div class="conv-key">💰 Valor</div><div class="conv-val" style="color:var(--success)">R$ ${(os.valor||0).toFixed(2)}</div></div>
+    ${os.obs ? `<div style="margin:12px 0;padding:12px;background:var(--surface);border-radius:10px;font-size:13px;color:var(--muted)">📝 ${os.obs}</div>` : ''}
+    <div class="form-group" style="margin-top:16px">
+      <label class="form-label">Alterar Status</label>
+      <select class="form-control" id="os-detail-status">${statusOpts}</select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <button class="btn btn-outline btn-sm" style="width:100%;padding:12px" onclick="excluirOS(${id})">🗑️ Excluir</button>
+      <button class="btn btn-primary btn-sm" style="width:100%;padding:12px" onclick="atualizarStatusOS(${id})">💾 Atualizar</button>
+    </div>
+    ${os.status!=='concluida'?`<button class="btn btn-success" style="margin-top:10px" onclick="concluirOS(${id})">✅ Marcar como Concluída</button>`:''}
+  `;
+  openModal('modal-os-detalhe');
+}
+
+async function atualizarStatusOS(id) {
+  const os = await dbGet('os', id);
+  os.status = document.getElementById('os-detail-status').value;
+  await dbPut('os', os);
+  closeModal('modal-os-detalhe');
+  showToast('Status atualizado!');
+  loadOSList(); loadHome();
+}
+
+async function concluirOS(id) {
+  const os = await dbGet('os', id);
+  os.status = 'concluida';
+  os.concluidaEm = new Date().toISOString();
+  await dbPut('os', os);
+  // auto-lança financeiro
+  if (os.valor > 0) {
+    await dbAdd('financeiro', {
+      tipo:'entrada', desc:`OS #${id} – ${os.clienteNome}`,
+      valor: os.valor, data: os.data||new Date().toISOString().split('T')[0],
+      cat:'servico', osId: id
+    });
+  }
+  closeModal('modal-os-detalhe');
+  showToast('🎉 OS concluída!');
+  loadOSList(); loadHome(); loadFinanceiro();
+}
+
+async function excluirOS(id) {
+  if (!confirm('Excluir esta OS?')) return;
+  await dbDelete('os', id);
+  closeModal('modal-os-detalhe');
+  showToast('OS excluída','error');
+  loadOSList(); loadHome();
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  const [y,m,dd] = d.split('-');
+  return `${dd}/${m}/${y}`;
+}
+
+// ========== CLIENTES ==========
+async function loadClients(query='') {
+  const all = await dbGetAll('clientes');
+  const q = query.toLowerCase();
+  const list = q ? all.filter(c=>c.nome?.toLowerCase().includes(q)||c.tel?.includes(q)) : all;
+  const cont = document.getElementById('client-list');
+  if (!list.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="es-icon">👥</div><div class="es-text">Nenhum cliente encontrado</div></div>';
+    return;
+  }
+  const allOS = await dbGetAll('os');
+  cont.innerHTML = list.map(c=>{
+    const osCount = allOS.filter(o=>o.clienteId===c.id).length;
+    const initials = c.nome?.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'??';
+    return `<div class="client-card" onclick="openClienteDetail(${c.id})">
+      <div class="client-avatar">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div class="client-name">${c.nome}</div>
+        <div class="client-contact">${c.tel||'Sem telefone'}</div>
+        <div class="client-badge">${c.instalacao||''} · ${c.cidade||''}</div>
+      </div>
+      <div class="client-os-count">${osCount} OS</div>
+    </div>`;
+  }).join('');
+}
+
+function searchClients(q) { loadClients(q); }
+
+async function salvarCliente() {
+  const data = {
+    nome: document.getElementById('cl-nome').value.trim(),
+    tel: document.getElementById('cl-tel').value,
+    email: document.getElementById('cl-email').value,
+    doc: document.getElementById('cl-doc').value,
+    endereco: document.getElementById('cl-end').value,
+    instalacao: document.getElementById('cl-instalacao').value,
+    obs: document.getElementById('cl-obs').value,
+    criadoEm: new Date().toISOString()
+  };
+  if (!data.nome) { showToast('Informe o nome do cliente','error'); return; }
+  await dbAdd('clientes', data);
+  closeModal('modal-novo-cliente');
+  showToast('✅ Cliente cadastrado!');
+  ['cl-nome','cl-tel','cl-email','cl-doc','cl-end','cl-obs'].forEach(id=>document.getElementById(id).value='');
+  loadClients();
+}
+
+async function openClienteDetail(id) {
+  const c = await dbGet('clientes', id);
+  const allOS = await dbGetAll('os');
+  const clienteOS = allOS.filter(o=>o.clienteId===id);
+  const initials = c.nome?.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'??';
+  const cont = document.getElementById('os-detalhe-content');
+  cont.innerHTML = `
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--fire),var(--fire-dark));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#fff;margin:0 auto 10px">${initials}</div>
+      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800">${c.nome}</div>
+      <div style="font-size:13px;color:var(--muted)">${c.instalacao||''}</div>
+    </div>
+    <div class="conv-row"><div class="conv-key">📞 Telefone</div><div class="conv-val">${c.tel||'—'}</div></div>
+    <div class="conv-row"><div class="conv-key">📧 E-mail</div><div class="conv-val">${c.email||'—'}</div></div>
+    <div class="conv-row"><div class="conv-key">📍 Endereço</div><div class="conv-val">${c.endereco||'—'}</div></div>
+    <div class="conv-row"><div class="conv-key">📋 Total de OS</div><div class="conv-val">${clienteOS.length}</div></div>
+    ${clienteOS.length?`<div style="margin-top:16px"><div style="font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Histórico de Serviços</div>${clienteOS.slice(0,5).map(os=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span>${tipoLabel(os.tipo)} – ${formatDate(os.data)}</span><span class="os-status ${os.status}">${statusLabel(os.status)}</span></div>`).join('')}</div>`:''}
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-outline" style="flex:1;padding:12px" onclick="ligarCliente('${c.tel}')">📞 Ligar</button>
+      <button class="btn btn-danger btn-sm" style="padding:12px" onclick="excluirCliente(${id})">🗑️</button>
+    </div>
+  `;
+  openModal('modal-os-detalhe');
+}
+
+function ligarCliente(tel) {
+  if (tel) window.open('tel:'+tel.replace(/\D/g,''));
+}
+
+async function excluirCliente(id) {
+  if (!confirm('Excluir este cliente?')) return;
+  await dbDelete('clientes', id);
+  closeModal('modal-os-detalhe');
+  showToast('Cliente excluído','error');
+  loadClients();
+}
+
+// ========== FINANCEIRO ==========
+async function loadFinanceiro() {
+  const all = await dbGetAll('financeiro');
+  const now = new Date();
+  const mes = all.filter(t=>{
+    const d = new Date(t.data);
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  });
+  const entradas = mes.filter(t=>t.tipo==='entrada').reduce((s,t)=>s+t.valor,0);
+  const saidas = mes.filter(t=>t.tipo==='saida').reduce((s,t)=>s+t.valor,0);
+  const allOS = await dbGetAll('os');
+  const receber = allOS.filter(o=>o.status!=='concluida'&&o.valor).reduce((s,o)=>s+(o.valor||0),0);
+  const osMes = allOS.filter(o=>{
+    const d = new Date(o.data); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  }).length;
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('fin-month').textContent = `${meses[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('fin-total').textContent = `R$ ${(entradas-saidas).toFixed(2).replace('.',',')}`;
+  document.getElementById('fin-entradas').textContent = `R$ ${entradas.toFixed(0)}`;
+  document.getElementById('fin-saidas').textContent = `R$ ${saidas.toFixed(0)}`;
+  document.getElementById('fin-receber').textContent = `R$ ${receber.toFixed(0)}`;
+  document.getElementById('fin-os-mes').textContent = osMes;
+
+  const cont = document.getElementById('transaction-list');
+  const sorted = all.sort((a,b)=>b.id-a.id).slice(0,20);
+  if (!sorted.length) {
+    cont.innerHTML = '<div class="empty-state"><div class="es-icon">💰</div><div class="es-text">Nenhum lançamento ainda</div></div>';
+    return;
+  }
+  cont.innerHTML = sorted.map(t=>`<div class="transaction-item">
+    <div class="tx-icon ${t.tipo}">${t.tipo==='entrada'?'💚':'🔴'}</div>
+    <div class="tx-info">
+      <div class="tx-desc">${t.desc}</div>
+      <div class="tx-date">${formatDate(t.data)} · ${t.cat||''}</div>
+    </div>
+    <div class="tx-value ${t.tipo}">${t.tipo==='entrada'?'+':'-'}R$${t.valor.toFixed(2)}</div>
+  </div>`).join('');
+}
+
+async function salvarLancamento() {
+  const data = {
+    tipo: document.getElementById('tx-tipo').value,
+    desc: document.getElementById('tx-desc').value||'Lançamento',
+    valor: parseFloat(document.getElementById('tx-valor').value)||0,
+    data: document.getElementById('tx-data').value||new Date().toISOString().split('T')[0],
+    cat: document.getElementById('tx-cat').value
+  };
+  await dbAdd('financeiro', data);
+  closeModal('modal-lancamento');
+  showToast('Lançamento salvo!');
+  loadFinanceiro();
+}
+
+// ========== AGENDA ==========
+let calYear, calMonth, selectedDay;
+function initCalendar() {
+  const n = new Date(); calYear=n.getFullYear(); calMonth=n.getMonth(); selectedDay=n.getDate();
+}
+function changeMonth(d) { calMonth+=d; if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar(); }
+
+async function renderCalendar() {
+  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('cal-month-title').textContent=`${meses[calMonth]} ${calYear}`;
+  const allOS = await dbGetAll('os');
+  const first=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date(); const todayStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  let html='';
+  for(let i=0;i<first;i++) html+='<div></div>';
+  for(let d=1;d<=days;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const hasEvent=allOS.some(o=>o.data===ds);
+    const isToday=ds===todayStr;
+    const isSel=d===selectedDay&&calMonth===today.getMonth()&&calYear===today.getFullYear()||false;
+    html+=`<div class="cal-day${isToday?' today':''}${hasEvent?' has-event':''}${isSel&&!isToday?' selected':''}" onclick="selectDay(${d})">${d}</div>`;
+  }
+  document.getElementById('cal-days').innerHTML=html;
+  renderDayEvents(selectedDay||today.getDate());
+}
+
+async function selectDay(d) {
+  selectedDay=d; renderCalendar();
+}
+
+async function renderDayEvents(d) {
+  const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const allOS=await dbGetAll('os');
+  const events=allOS.filter(o=>o.data===ds).sort((a,b)=>a.hora?.localeCompare(b.hora||'')||0);
+  const cont=document.getElementById('agenda-events');
+  if(!events.length){cont.innerHTML='<div class="empty-state"><div class="es-icon">📅</div><div class="es-text">Nenhum compromisso</div></div>';return;}
+  cont.innerHTML=events.map(e=>`<div class="event-item" onclick="openOSDetail(${e.id})">
+    <div class="event-time">${e.hora||'–'}</div>
+    <div class="event-bar"></div>
+    <div><div class="event-title">${tipoLabel(e.tipo)}</div><div class="event-client">${e.clienteNome||'S/ cliente'} · ${e.gas}</div></div>
+  </div>`).join('');
+}
+
+// ========== CHECKLIST ==========
+const CHECKLISTS = {
+  instalacao: [
+    { group: 'Documentação e Projeto', items: ['Verificar projeto aprovado pelo órgão competente','Conferir especificações do tipo de gás (GN/GLP)','ART ou RRT do profissional responsável emitida','Aprovação da distribuidora (se GN)'] },
+    { group: 'Tubulação e Conexões', items: ['Tubo de material adequado (cobre, aço ou PRPN)','Diâmetro conforme projeto dimensionado','Conexões sem vazamentos (teste de sabão)','Fixação adequada da tubulação (suportes)','Tubulação identificada (etiquetas/pintura)'] },
+    { group: 'Equipamentos', items: ['Regulador de pressão instalado corretamente','Válvulas de bloqueio posicionadas','Purgador instalado (se necessário)','Medidor/hidrômetro de gás verificado'] },
+    { group: 'Ventilação', items: ['Ambiente ventilado conforme norma NBR 13103','Abertura permanente de ventilação inferior','Abertura permanente de ventilação superior','Sem possibilidade de acúmulo de gás'] },
+    { group: 'Teste Final', items: ['Teste de estanqueidade realizado (manômetro)','Pressão de serviço dentro do padrão','Nenhum vazamento detectado','Documentação de conclusão entregue ao cliente'] }
+  ],
+  conversao: [
+    { group: 'Antes da Conversão', items: ['Identificar tipo de gás atual do aparelho','Verificar manual do fabricante','Coletar kit de conversão específico do modelo','Registrar foto da plaqueta de identificação'] },
+    { group: 'Procedimento', items: ['Fechar registro geral de gás','Desconectar aparelho da fonte de gás','Remover bicos queimadores originais','Instalar bicos do kit de conversão','Ajustar injetor do forno (se houver)','Ajustar torneira de ar primário dos queimadores'] },
+    { group: 'Teste e Finalização', items: ['Reconectar e abrir registro gradualmente','Verificar chama de todos os queimadores (azul)','Sem cor amarela ou vermelha na chama','Testar todos os modos do forno','Afixar plaqueta do novo tipo de gás','Entregar termo de conversão assinado ao cliente'] }
+  ],
+  vistoria: [
+    { group: 'Inspeção Visual', items: ['Verificar estado geral da tubulação','Identificar corrosão, amassamentos ou danos','Verificar fixação dos suportes','Checar estado dos flexíveis/mangueiras','Mangueiras dentro do prazo de validade'] },
+    { group: 'Equipamentos', items: ['Estado do regulador de pressão','Funcionamento das válvulas de bloqueio','Estado do medidor de gás','Distância mínima de fontes de calor'] },
+    { group: 'Testes', items: ['Teste de estanqueidade de toda a rede','Verificar pressão de serviço','Teste de cada ponto de gás','Sem vazamentos detectados'] },
+    { group: 'Segurança', items: ['Ventilação do ambiente adequada','Ausência de materiais inflamáveis próximos','Extintor disponível no ambiente','Laudo de vistoria emitido e assinado'] }
+  ]
+};
+
+let checklistState = {};
+
+function renderChecklist(tipo) {
+  const data = CHECKLISTS[tipo];
+  const cont = document.getElementById('checklist-content');
+  if (!checklistState[tipo]) checklistState[tipo] = {};
+  let html = '';
+  data.forEach((g,gi) => {
+    html += `<div class="checklist-group"><div class="checklist-group-title">${g.group}</div>`;
+    g.items.forEach((item,ii) => {
+      const key = `${gi}-${ii}`;
+      const checked = checklistState[tipo][key]||false;
+      html += `<div class="check-item${checked?' checked':''}" onclick="toggleCheck('${tipo}','${key}',this)">
+        <div class="check-box">${checked?'✓':''}</div>
+        <div class="check-text">${item}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  const total = data.reduce((s,g)=>s+g.items.length,0);
+  const done = Object.values(checklistState[tipo]||{}).filter(Boolean).length;
+  html = `<div style="padding:10px 20px 6px;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:13px;color:var(--muted)">${done}/${total} itens</span>
+    <div style="height:6px;border-radius:3px;background:var(--surface);width:120px;overflow:hidden"><div style="height:100%;width:${total?Math.round(done/total*100):0}%;background:var(--success);border-radius:3px;transition:width 0.3s"></div></div>
+  </div>` + html;
+  cont.innerHTML = html;
+}
+
+function toggleCheck(tipo, key, el) {
+  if (!checklistState[tipo]) checklistState[tipo]={};
+  checklistState[tipo][key] = !checklistState[tipo][key];
+  el.classList.toggle('checked');
+  el.querySelector('.check-box').textContent = checklistState[tipo][key] ? '✓' : '';
+  // re-render progress
+  const curr = document.querySelector('.filter-tab.active')?.textContent?.toLowerCase()||'instalacao';
+  renderChecklist(tipo);
+}
+
+function switchChecklist(tipo, el) {
+  document.querySelectorAll('#page-checklist .filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderChecklist(tipo);
+}
+
+// ========== CALCULADORAS ==========
+const APARELHOS = [
+  { nome:'Fogão 4 bocas', vazao:0.56 },
+  { nome:'Fogão 5 bocas', vazao:0.70 },
+  { nome:'Cooktop 4 bocas', vazao:0.56 },
+  { nome:'Forno de embutir', vazao:0.30 },
+  { nome:'Aquecedor de passagem 15L', vazao:0.76 },
+  { nome:'Aquecedor de passagem 20L', vazao:1.00 },
+  { nome:'Aquecedor de passagem 27L', vazao:1.35 },
+  { nome:'Caldeira residencial', vazao:2.00 },
+  { nome:'Churrasqueira a gás', vazao:0.50 },
+  { nome:'Secadora de roupas', vazao:0.48 },
+];
+
+function renderAparelhos() {
+  document.getElementById('aparelhos-list').innerHTML = APARELHOS.map((a,i)=>`
+    <div class="check-item" id="ap-${i}" onclick="toggleAparelho(${i},this)">
+      <div class="check-box"></div>
+      <div class="check-text" style="flex:1">${a.nome}</div>
+      <div style="font-size:12px;color:var(--muted)">${a.vazao} m³/h</div>
+    </div>`).join('');
+}
+
+const aparelhosAtivos = {};
+function toggleAparelho(i, el) {
+  aparelhosAtivos[i] = !aparelhosAtivos[i];
+  el.classList.toggle('checked');
+  el.querySelector('.check-box').textContent = aparelhosAtivos[i]?'✓':'';
+}
+
+function calcConsumo() {
+  const total = APARELHOS.reduce((s,a,i)=>s+(aparelhosAtivos[i]?a.vazao:0),0);
+  const box = document.getElementById('res-consumo');
+  box.style.display='block';
+  document.getElementById('res-cons-val').textContent = total.toFixed(2);
+}
+
+function openCalc(id) {
+  document.querySelectorAll('.calc-panel').forEach(p=>p.classList.remove('active'));
+  const panel = document.getElementById('calc-'+id);
+  if (panel) { panel.classList.add('active'); panel.scrollIntoView({behavior:'smooth',block:'start'}); }
+}
+
+function calcTubulacao() {
+  const vazao=parseFloat(document.getElementById('ct-vazao').value)||0;
+  const comp=parseFloat(document.getElementById('ct-comprimento').value)||0;
+  const tipo=document.getElementById('ct-tipo').value;
+  if(!vazao||!comp){showToast('Preencha todos os campos','error');return;}
+  // Fórmula simplificada baseada em tabelas NBR
+  const fator = tipo==='gn' ? 1.0 : 1.25;
+  const q_eq = vazao * fator;
+  const L_eq = comp * 1.3; // 30% comprimento equivalente
+  let dn;
+  if(q_eq*L_eq < 5) dn='DN 15 (1/2")';
+  else if(q_eq*L_eq < 20) dn='DN 20 (3/4")';
+  else if(q_eq*L_eq < 60) dn='DN 25 (1")';
+  else if(q_eq*L_eq < 150) dn='DN 32 (1 1/4")';
+  else dn='DN 40 (1 1/2") ou maior';
+  const box=document.getElementById('res-tubulacao');
+  box.style.display='block';
+  document.getElementById('res-tub-val').textContent=dn;
+  document.getElementById('res-tub-detail').textContent=`Vazão: ${vazao} m³/h · Comp.: ${comp}m · ${tipo.toUpperCase()}`;
+}
+
+function calcPressao() {
+  const q=parseFloat(document.getElementById('cp-vazao').value)||0;
+  const L=parseFloat(document.getElementById('cp-comp').value)||0;
+  const d=parseFloat(document.getElementById('cp-diam').value)||1;
+  const tipo=document.getElementById('cp-tipo').value;
+  if(!q||!L||!d){showToast('Preencha todos os campos','error');return;}
+  const rho=tipo==='gn'?0.72:2.0;
+  // Darcy-Weisbach simplificado
+  const v=q/(3600*Math.PI*(d/1000/2)**2);
+  const f=0.03;
+  const dP=(f*L*rho*v*v)/(2*(d/1000));
+  const box=document.getElementById('res-pressao');
+  box.style.display='block';
+  document.getElementById('res-pres-val').textContent=dP.toFixed(1);
+  document.getElementById('res-pres-detail').textContent=`Pa (${(dP/100).toFixed(3)} mbar) · ${tipo.toUpperCase()} · v=${v.toFixed(2)} m/s`;
+}
+
+function calcBotijao() {
+  const peso=parseFloat(document.getElementById('cb-peso').value)||13;
+  const cons=parseFloat(document.getElementById('cb-consumo').value)||0.5;
+  const horas=parseFloat(document.getElementById('cb-horas').value)||2;
+  const vol=peso/1.97; // 1kg GLP ≈ 0.508m³
+  const autonomiaDias=vol/(cons*horas);
+  const box=document.getElementById('res-botijao');
+  box.style.display='block';
+  document.getElementById('res-bot-val').textContent=Math.round(autonomiaDias);
+  document.getElementById('res-bot-detail').textContent=`dias · ${vol.toFixed(1)} m³ disponíveis · ${horas}h/dia`;
+}
+
+function calcRegulador() {
+  const vazao=parseFloat(document.getElementById('cr-vazao').value)||0;
+  const tipo=document.getElementById('cr-tipo').value;
+  let rec, detalhe;
+  if(tipo==='mono') {
+    if(vazao<1.5) rec='Monorregulador 4,0 kg/h';
+    else if(vazao<3) rec='Monorregulador 8,0 kg/h';
+    else rec='Monorregulador 15 kg/h';
+    detalhe='Instalação direta P-13';
+  } else if(tipo==='1a') {
+    if(vazao<5) rec='Reg. 1ª Fase 5 m³/h';
+    else rec='Reg. 1ª Fase 10+ m³/h';
+    detalhe='Alta → Média pressão';
+  } else {
+    if(vazao<2) rec='Reg. 2ª Fase 4 m³/h';
+    else rec='Reg. 2ª Fase 10 m³/h';
+    detalhe='Média → Baixa pressão';
+  }
+  const box=document.getElementById('res-regulador');
+  box.style.display='block';
+  document.getElementById('res-reg-val').textContent=rec;
+  document.getElementById('res-reg-detail').textContent=detalhe+` · Vazão: ${vazao} m³/h`;
+}
+
+function calcOrcamento() {
+  const tipo=document.getElementById('co-tipo').value;
+  const metros=parseFloat(document.getElementById('co-metros').value)||0;
+  const conexoes=parseFloat(document.getElementById('co-conexoes').value)||0;
+  const hora=parseFloat(document.getElementById('co-hora').value)||80;
+  const horas=parseFloat(document.getElementById('co-horas').value)||4;
+  const base={instalacao_simples:150,instalacao_completa:350,conversao_fogao:120,manutencao:80,vistoria:60};
+  const mao=hora*horas;
+  const material=(metros*25)+(conexoes*8);
+  const total=base[tipo]+mao+material;
+  const box=document.getElementById('res-orcamento');
+  box.style.display='block';
+  document.getElementById('res-orc-val').textContent=`R$ ${total.toFixed(2).replace('.',',')}`;
+  document.getElementById('res-orc-detail').textContent=`Base R$${base[tipo]} + MO R$${mao} + Material R$${material.toFixed(0)}`;
+}
+
+// ========== CONVERSÃO BICO ==========
+function calcBico() {
+  const original=parseFloat(document.getElementById('bico-original').value)||0;
+  const dir=document.getElementById('bico-de').value;
+  if(!original){showToast('Informe o bico original','error');return;}
+  // Fórmula baseada na razão de pressões e densidades
+  // d_GN = d_GLP × √(P_GLP/P_GN) × ⁴√(ρ_GLP/ρ_GN)
+  let resultado, detalhe;
+  if(dir==='glp-gn'){
+    resultado = original * Math.sqrt(2.8/1.3) * Math.pow(1.55/0.55, 0.25);
+    detalhe = `${original.toFixed(2)}mm GLP → ${resultado.toFixed(2)}mm GN`;
+  } else {
+    resultado = original / (Math.sqrt(2.8/1.3) * Math.pow(1.55/0.55, 0.25));
+    detalhe = `${original.toFixed(2)}mm GN → ${resultado.toFixed(2)}mm GLP`;
+  }
+  document.getElementById('res-bico').style.display='block';
+  document.getElementById('res-bico-val').textContent=resultado.toFixed(2);
+  document.getElementById('res-bico-detail').textContent=detalhe;
+}
+
+// ========== PERFIL ==========
+async function loadPerfilForm() {
+  const cfg=await dbGet('config','perfil');
+  if(cfg&&cfg.value){
+    const p=cfg.value;
+    document.getElementById('pf-nome').value=p.nome||'';
+    document.getElementById('pf-crg').value=p.crg||'';
+    document.getElementById('pf-crea').value=p.crea||'';
+    document.getElementById('pf-tel').value=p.tel||'';
+    document.getElementById('pf-cidade').value=p.cidade||'';
+  }
+}
+
+async function salvarPerfil() {
+  const data={
+    nome:document.getElementById('pf-nome').value,
+    crg:document.getElementById('pf-crg').value,
+    crea:document.getElementById('pf-crea').value,
+    tel:document.getElementById('pf-tel').value,
+    cidade:document.getElementById('pf-cidade').value
+  };
+  await dbPut('config',{key:'perfil',value:data});
+  // atualiza UI
+  document.getElementById('profile-name').textContent=data.nome||'Peixoto';
+  document.getElementById('hero-name').textContent=data.nome||'Peixoto';
+  const initials=(data.nome||'PX').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('profile-avatar').textContent=initials;
+  document.getElementById('profile-reg').textContent=`CRG: ${data.crg||'—'} | CREA: ${data.crea||'—'}`;
+  closeModal('modal-perfil-edit');
+  showToast('Perfil atualizado!');
+}
+
+async function loadPrecosForm() {
+  const cfg=await dbGet('config','precos');
+  if(cfg&&cfg.value){
+    const p=cfg.value;
+    ['inst-simples','inst-completa','conversao','manutencao','vistoria','metro','hora'].forEach(k=>{
+      const el=document.getElementById('pr-'+k);
+      if(el&&p[k]) el.value=p[k];
+    });
+  }
+}
+
+async function salvarPrecos() {
+  const keys=['inst-simples','inst-completa','conversao','manutencao','vistoria','metro','hora'];
+  const data={};
+  keys.forEach(k=>data[k]=parseFloat(document.getElementById('pr-'+k).value)||0);
+  await dbPut('config',{key:'precos',value:data});
+  closeModal('modal-precos');
+  showToast('Tabela de preços salva!');
+}
+
+// ========== NOTIFICAÇÕES ==========
+function showNotifications() {
+  showToast('📬 Sistema de notificações em breve','success');
+}
+
+// ========== EXPORT ==========
+async function exportData() {
+  const [os,cl,fin]=await Promise.all([dbGetAll('os'),dbGetAll('clientes'),dbGetAll('financeiro')]);
+  const data={os,clientes:cl,financeiro:fin,exportadoEm:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='gasista-backup.json';a.click();
+  showToast('Dados exportados!');
+}
+
+async function clearData() {
+  if(!confirm('⚠️ Isso apagará TODOS os dados. Tem certeza?')) return;
+  if(!confirm('Confirme novamente: apagar tudo?')) return;
+  const stores=['os','clientes','financeiro','config'];
+  for(const s of stores){
+    const all=await dbGetAll(s);
+    for(const i of all) await dbDelete(s,i.id||i.key);
+  }
+  showToast('Dados apagados','error');
+  loadHome();
+}
+
+// ========== NOTIF BADGE ==========
+async function updateNotifBadge() {
+  const all=await dbGetAll('os');
+  const pending=all.filter(o=>o.status==='pendente').length;
+  const badge=document.getElementById('notif-badge');
+  if(pending>0){badge.style.display='flex';badge.textContent=pending;}
+  else badge.style.display='none';
+}
+
+// ========== INIT ==========
+async function init() {
+  await initDB();
+  initCalendar();
+  // set tx-data default
+  const today=new Date().toISOString().split('T')[0];
+  if(document.getElementById('tx-data')) document.getElementById('tx-data').value=today;
+  // load profile
+  const cfg=await dbGet('config','perfil');
+  if(cfg&&cfg.value){
+    const p=cfg.value;
+    document.getElementById('profile-name').textContent=p.nome||'Peixoto';
+    document.getElementById('hero-name').textContent=p.nome||'Peixoto';
+    const initials=(p.nome||'PX').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('profile-avatar').textContent=initials;
+    document.getElementById('profile-reg').textContent=`CRG: ${p.crg||'—'} | CREA: ${p.crea||'—'}`;
+  }
+  await loadHome();
+  await updateNotifBadge();
+  // hide splash
+  setTimeout(()=>document.getElementById('splash').classList.add('hide'),1200);
+}
+
+// close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click',e=>{
+    if(e.target===overlay) overlay.classList.remove('open');
+  });
+});
+
+init();
+</script>
+</body>
+</html>
