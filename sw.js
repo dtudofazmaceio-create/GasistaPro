@@ -1,4 +1,4 @@
-const CACHE_NAME = 'peixoto-gasista-v1';
+const CACHE_NAME = 'peixoto-gasista-v2';
 const ASSETS = [
   './index.html',
   './manifest.json',
@@ -37,6 +37,17 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(() => cached);
       return cached || network;
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
+      const existing = clientsArr.find((c) => 'focus' in c);
+      if (existing) return existing.focus();
+      return self.clients.openWindow('./index.html');
     })
   );
 });
