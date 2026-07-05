@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -568,6 +569,13 @@
   .event-bar { width:3px; border-radius:2px; background:var(--fire); flex-shrink:0; min-height:36px; }
   .event-title { font-size:14px; font-weight:700; letter-spacing:-0.1px; }
   .event-client { font-size:12px; color:var(--muted); margin-top:2px; font-weight:500; }
+  .event-item.done .event-title { color:var(--muted); text-decoration:line-through; }
+  .event-check {
+    width:24px; height:24px; border-radius:50%; flex-shrink:0;
+    border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center;
+    color:transparent; cursor:pointer;
+  }
+  .event-check.done { background:var(--success); border-color:var(--success); color:#fff; }
 
   /* ===== PERFIL ===== */
   .profile-header {
@@ -1214,7 +1222,7 @@
           <option value="ambos">Ambos</option>
         </select>
       </div>
-      <div class="form-row">
+      <div class="form-row" style="grid-template-columns: 1.2fr 1fr;">
         <div class="form-group">
           <label class="form-label">Data</label>
           <input type="date" class="form-control" id="os-data">
@@ -1329,7 +1337,7 @@
         <label class="form-label">Descrição</label>
         <input type="text" class="form-control" id="tx-desc" placeholder="Ex: Serviço de instalação">
       </div>
-      <div class="form-row">
+      <div class="form-row" style="grid-template-columns: 1fr 1.2fr;">
         <div class="form-group">
           <label class="form-label">Valor (R$)</label>
           <input type="number" class="form-control" id="tx-valor" placeholder="0,00">
@@ -1435,6 +1443,68 @@
   </div>
 </div>
 
+<!-- ===== NOVA ATIVIDADE (lembrete/tarefa genérica da agenda) ===== -->
+<div class="modal-overlay" id="modal-atividade">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="atividade-modal-title">Nova Atividade</div>
+      <div class="modal-close" onclick="closeModal('modal-atividade')"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="at-id">
+      <div class="form-group">
+        <label class="form-label">Título</label>
+        <input type="text" class="form-control" id="at-titulo" placeholder="Ex: Comprar mangueira flexível">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-control" id="at-tipo">
+          <option value="lembrete">Lembrete</option>
+          <option value="compra">Compra</option>
+          <option value="tarefa">Tarefa</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="form-row" style="grid-template-columns: 1.2fr 1fr;">
+        <div class="form-group">
+          <label class="form-label">Data</label>
+          <input type="date" class="form-control" id="at-data">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora (opcional)</label>
+          <input type="time" class="form-control" id="at-hora">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notas (opcional)</label>
+        <textarea class="form-control" id="at-notas" placeholder="Detalhes, quantidade, fornecedor..."></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="salvarAtividade()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3"/><path d="M8 21v-6h8v6"/></svg> Salvar Atividade</button>
+      <button class="btn btn-outline btn-sm" id="at-delete-btn" style="width:100%;margin-top:10px;display:none" onclick="excluirAtividadeAtual()">Excluir Atividade</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ESCOLHER TIPO (FAB da Agenda) ===== -->
+<div class="modal-overlay" id="modal-escolher-tipo">
+  <div class="modal" style="max-height:none">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">O que deseja criar?</div>
+      <div class="modal-close" onclick="closeModal('modal-escolher-tipo')"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+    </div>
+    <div class="modal-body">
+      <div class="pm-item" onclick="closeModal('modal-escolher-tipo');abrirNovaOSFromAgenda()">
+        <div class="pm-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6M9 15h6"/></svg></div><div class="pm-label">Ordem de Serviço</div><div class="pm-arrow">›</div>
+      </div>
+      <div class="pm-item" onclick="closeModal('modal-escolher-tipo');abrirNovaAtividade()">
+        <div class="pm-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></div><div class="pm-label">Atividade / Lembrete</div><div class="pm-arrow">›</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"><span class="toast-icon" id="toast-icon"></span><span id="toast-text"></span></div>
 
@@ -1506,7 +1576,7 @@ function ICON(name, size) {
 // ========== INDEXEDDB ==========
 let db;
 const DB_NAME = 'GasistaProDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 function initDB() {
   return new Promise((resolve, reject) => {
@@ -1528,6 +1598,10 @@ function initDB() {
       }
       if (!d.objectStoreNames.contains('config')) {
         d.createObjectStore('config', { keyPath: 'key' });
+      }
+      if (!d.objectStoreNames.contains('atividades')) {
+        const at = d.createObjectStore('atividades', { keyPath: 'id', autoIncrement: true });
+        at.createIndex('data', 'data');
       }
     };
   });
@@ -1592,7 +1666,7 @@ const fabActions = {
   os:()=>openModal('modal-nova-os'),
   clientes:()=>openModal('modal-novo-cliente'),
   financeiro:()=>openModal('modal-lancamento'),
-  agenda:()=>openModal('modal-nova-os'),
+  agenda:()=>openModal('modal-escolher-tipo'),
   checklist:null, calculadoras:null, conversao:null, perfil:null
 };
 let currentPage = 'home';
@@ -1975,7 +2049,7 @@ function changeMonth(d) { calMonth+=d; if(calMonth>11){calMonth=0;calYear++;}if(
 async function renderCalendar() {
   const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   document.getElementById('cal-month-title').textContent=`${meses[calMonth]} ${calYear}`;
-  const allOS = await dbGetAll('os');
+  const [allOS, allAt] = await Promise.all([dbGetAll('os'), dbGetAll('atividades')]);
   const first=new Date(calYear,calMonth,1).getDay();
   const days=new Date(calYear,calMonth+1,0).getDate();
   const today=new Date(); const todayStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
@@ -1983,7 +2057,7 @@ async function renderCalendar() {
   for(let i=0;i<first;i++) html+='<div></div>';
   for(let d=1;d<=days;d++){
     const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const hasEvent=allOS.some(o=>o.data===ds);
+    const hasEvent=allOS.some(o=>o.data===ds)||allAt.some(a=>a.data===ds);
     const isToday=ds===todayStr;
     const isSel=d===selectedDay&&calMonth===today.getMonth()&&calYear===today.getFullYear()||false;
     html+=`<div class="cal-day${isToday?' today':''}${hasEvent?' has-event':''}${isSel&&!isToday?' selected':''}" onclick="selectDay(${d})">${d}</div>`;
@@ -1996,17 +2070,120 @@ async function selectDay(d) {
   selectedDay=d; renderCalendar();
 }
 
+const ATIVIDADE_TIPO_LABEL = { lembrete:'Lembrete', compra:'Compra', tarefa:'Tarefa', outro:'Outro' };
+const ATIVIDADE_TIPO_COR = { lembrete:'#9B59B6', compra:'#2E9E7A', tarefa:'#C8A020', outro:'#6B8F6E' };
+
 async function renderDayEvents(d) {
   const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-  const allOS=await dbGetAll('os');
-  const events=allOS.filter(o=>o.data===ds).sort((a,b)=>a.hora?.localeCompare(b.hora||'')||0);
+  const [allOS, allAt] = await Promise.all([dbGetAll('os'), dbGetAll('atividades')]);
+  const eventosOS = allOS.filter(o=>o.data===ds).map(o=>({
+    hora:o.hora||'', tipo:'os', id:o.id,
+    titulo:tipoLabel(o.tipo), sub:`${o.clienteNome||'S/ cliente'} · ${o.gas}`,
+    cor:'var(--fire)', done:o.status==='concluida'
+  }));
+  const eventosAt = allAt.filter(a=>a.data===ds).map(a=>({
+    hora:a.hora||'', tipo:'atividade', id:a.id,
+    titulo:a.titulo, sub:ATIVIDADE_TIPO_LABEL[a.tipo]||'Atividade',
+    cor:ATIVIDADE_TIPO_COR[a.tipo]||'var(--fire)', done:!!a.concluida
+  }));
+  const events = [...eventosOS, ...eventosAt].sort((a,b)=>(a.hora||'99:99').localeCompare(b.hora||'99:99'));
   const cont=document.getElementById('agenda-events');
   if(!events.length){cont.innerHTML=`<div class="empty-state"><div class="es-icon">${ICON('calendar')}</div><div class="es-text">Nenhum compromisso</div></div>`;return;}
-  cont.innerHTML=events.map(e=>`<div class="event-item" onclick="openOSDetail(${e.id})">
-    <div class="event-time">${e.hora||'–'}</div>
-    <div class="event-bar"></div>
-    <div><div class="event-title">${tipoLabel(e.tipo)}</div><div class="event-client">${e.clienteNome||'S/ cliente'} · ${e.gas}</div></div>
-  </div>`).join('');
+  cont.innerHTML=events.map(e=>{
+    if (e.tipo==='os') {
+      return `<div class="event-item${e.done?' done':''}" onclick="openOSDetail(${e.id})">
+        <div class="event-time">${e.hora||'–'}</div>
+        <div class="event-bar" style="background:${e.cor}"></div>
+        <div style="flex:1"><div class="event-title">${e.titulo}</div><div class="event-client">${e.sub}</div></div>
+      </div>`;
+    }
+    return `<div class="event-item${e.done?' done':''}">
+      <div class="event-time">${e.hora||'–'}</div>
+      <div class="event-bar" style="background:${e.cor}"></div>
+      <div style="flex:1" onclick="abrirEditarAtividade(${e.id})"><div class="event-title">${e.titulo}</div><div class="event-client">${e.sub}</div></div>
+      <div class="event-check${e.done?' done':''}" onclick="toggleAtividadeConcluida(${e.id})">${ICON('check',14)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== ATIVIDADES (lembretes/tarefas genéricas da agenda) =====
+function abrirNovaOSFromAgenda() {
+  openModal('modal-nova-os');
+  const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(selectedDay||new Date().getDate()).padStart(2,'0')}`;
+  const dataInput = document.getElementById('os-data');
+  if (dataInput) dataInput.value = ds;
+}
+
+function abrirNovaAtividade() {
+  document.getElementById('at-id').value = '';
+  document.getElementById('at-titulo').value = '';
+  document.getElementById('at-tipo').value = 'lembrete';
+  document.getElementById('at-notas').value = '';
+  document.getElementById('at-hora').value = '';
+  const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(selectedDay||new Date().getDate()).padStart(2,'0')}`;
+  document.getElementById('at-data').value = ds;
+  document.getElementById('atividade-modal-title').textContent = 'Nova Atividade';
+  document.getElementById('at-delete-btn').style.display = 'none';
+  openModal('modal-atividade');
+}
+
+async function abrirEditarAtividade(id) {
+  const at = await dbGet('atividades', id);
+  if (!at) return;
+  document.getElementById('at-id').value = at.id;
+  document.getElementById('at-titulo').value = at.titulo||'';
+  document.getElementById('at-tipo').value = at.tipo||'lembrete';
+  document.getElementById('at-data').value = at.data||'';
+  document.getElementById('at-hora').value = at.hora||'';
+  document.getElementById('at-notas').value = at.notas||'';
+  document.getElementById('atividade-modal-title').textContent = 'Editar Atividade';
+  document.getElementById('at-delete-btn').style.display = 'block';
+  openModal('modal-atividade');
+}
+
+async function salvarAtividade() {
+  const titulo = document.getElementById('at-titulo').value.trim();
+  const data = document.getElementById('at-data').value;
+  if (!titulo) { showToast('Informe um título','error'); return; }
+  if (!data) { showToast('Informe a data','error'); return; }
+  const idRaw = document.getElementById('at-id').value;
+  const payload = {
+    titulo,
+    tipo: document.getElementById('at-tipo').value,
+    data,
+    hora: document.getElementById('at-hora').value,
+    notas: document.getElementById('at-notas').value,
+  };
+  if (idRaw) {
+    const existing = await dbGet('atividades', parseInt(idRaw));
+    await dbPut('atividades', { ...existing, ...payload });
+    showToast('Atividade atualizada!');
+  } else {
+    payload.concluida = false;
+    payload.criadaEm = new Date().toISOString();
+    await dbAdd('atividades', payload);
+    showToast('Atividade criada!');
+  }
+  closeModal('modal-atividade');
+  renderCalendar();
+}
+
+async function excluirAtividadeAtual() {
+  const idRaw = document.getElementById('at-id').value;
+  if (!idRaw) return;
+  if (!confirm('Excluir esta atividade?')) return;
+  await dbDelete('atividades', parseInt(idRaw));
+  closeModal('modal-atividade');
+  showToast('Atividade excluída','error');
+  renderCalendar();
+}
+
+async function toggleAtividadeConcluida(id) {
+  const at = await dbGet('atividades', id);
+  if (!at) return;
+  at.concluida = !at.concluida;
+  await dbPut('atividades', at);
+  renderDayEvents(selectedDay);
 }
 
 // ========== CHECKLIST ==========
@@ -2402,10 +2579,17 @@ async function openNotifModal() {
     Notification.permission === 'denied' ? 'Bloqueado nas permissões do navegador/celular' :
     isOn ? 'Ativadas — avisos de OS agendadas' : 'Avisos de OS agendadas quando o app estiver aberto';
 
-  // build pending list
-  const all = await dbGetAll('os');
+  // build pending list (OS + atividades)
+  const [allOS, allAt] = await Promise.all([dbGetAll('os'), dbGetAll('atividades')]);
   const today = new Date().toISOString().split('T')[0];
-  const pendentes = all.filter(o => o.status === 'pendente').sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+  const pendentesOS = allOS.filter(o => o.status === 'pendente').map(o => ({
+    data:o.data, hora:o.hora, titulo:`${o.clienteNome || 'Cliente não informado'} — ${tipoLabel(o.tipo)}`,
+    sub:o.endereco||'', tipo:'os'
+  }));
+  const pendentesAt = allAt.filter(a => !a.concluida).map(a => ({
+    data:a.data, hora:a.hora, titulo:a.titulo, sub:ATIVIDADE_TIPO_LABEL[a.tipo]||'Atividade', tipo:'atividade'
+  }));
+  const pendentes = [...pendentesOS, ...pendentesAt].sort((a,b)=>(a.data||'').localeCompare(b.data||''));
   const cont = document.getElementById('notif-list');
   if (!pendentes.length) {
     cont.innerHTML = `<div class="empty-state"><div class="es-icon">${ICON('bell')}</div><div class="es-text">Nenhuma pendência no momento</div></div>`;
@@ -2414,10 +2598,10 @@ async function openNotifModal() {
       const isToday = o.data === today;
       const label = isToday ? 'Hoje' : formatDate(o.data);
       return `<div class="notif-item">
-        <div class="ni-icon">${ICON(isToday ? 'zap' : 'calendar', 18)}</div>
+        <div class="ni-icon">${ICON(isToday ? 'zap' : (o.tipo==='atividade'?'bell':'calendar'), 18)}</div>
         <div style="flex:1">
-          <div class="ni-title">${o.clienteNome || 'Cliente não informado'} — ${tipoLabel(o.tipo)}</div>
-          <div class="ni-sub">${label}${o.hora?' às '+o.hora:''}${o.endereco?' · '+o.endereco:''}</div>
+          <div class="ni-title">${o.titulo}</div>
+          <div class="ni-sub">${label}${o.hora?' às '+o.hora:''}${o.sub?' · '+o.sub:''}</div>
         </div>
       </div>`;
     }).join('');
@@ -2471,21 +2655,29 @@ async function checkNotificationReminders() {
   const last = await dbGet('config', 'ultimo_lembrete');
   if (last && last.value === today) return;
 
-  const all = await dbGetAll('os');
-  const hoje = all.filter(o => o.status === 'pendente' && o.data === today);
+  const [allOS, allAt] = await Promise.all([dbGetAll('os'), dbGetAll('atividades')]);
+  const hoje = allOS.filter(o => o.status === 'pendente' && o.data === today);
   if (hoje.length === 1) {
     const o = hoje[0];
     showLocalNotification('Você tem uma OS hoje', `${o.clienteNome||'Cliente'} — ${tipoLabel(o.tipo)}${o.hora?' às '+o.hora:''}`);
   } else if (hoje.length > 1) {
     showLocalNotification('Você tem OS agendadas hoje', `${hoje.length} ordens de serviço pendentes para hoje.`);
   }
+
+  const atHoje = allAt.filter(a => !a.concluida && a.data === today);
+  if (atHoje.length === 1) {
+    showLocalNotification(atHoje[0].titulo, `${ATIVIDADE_TIPO_LABEL[atHoje[0].tipo]||'Atividade'} de hoje${atHoje[0].hora?' às '+atHoje[0].hora:''}`);
+  } else if (atHoje.length > 1) {
+    showLocalNotification('Você tem atividades hoje', `${atHoje.length} lembretes/tarefas pendentes para hoje.`);
+  }
+
   await dbPut('config', { key: 'ultimo_lembrete', value: today });
 }
 
 // ========== EXPORT ==========
 async function exportData() {
-  const [os,cl,fin]=await Promise.all([dbGetAll('os'),dbGetAll('clientes'),dbGetAll('financeiro')]);
-  const data={os,clientes:cl,financeiro:fin,exportadoEm:new Date().toISOString()};
+  const [os,cl,fin,at]=await Promise.all([dbGetAll('os'),dbGetAll('clientes'),dbGetAll('financeiro'),dbGetAll('atividades')]);
+  const data={os,clientes:cl,financeiro:fin,atividades:at,exportadoEm:new Date().toISOString()};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='gasista-backup.json';a.click();
@@ -2495,7 +2687,7 @@ async function exportData() {
 async function clearData() {
   if(!confirm('Atenção: isso apagará TODOS os dados. Tem certeza?')) return;
   if(!confirm('Confirme novamente: apagar tudo?')) return;
-  const stores=['os','clientes','financeiro','config'];
+  const stores=['os','clientes','financeiro','config','atividades'];
   for(const s of stores){
     const all=await dbGetAll(s);
     for(const i of all) await dbDelete(s,i.id||i.key);
