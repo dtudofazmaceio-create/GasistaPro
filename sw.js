@@ -1,4 +1,4 @@
-const CACHE_NAME = 'peixoto-gasista-v3';
+const CACHE_NAME = 'peixoto-gasista-v4';
 const ASSETS = [
   './index.html',
   './manifest.json',
