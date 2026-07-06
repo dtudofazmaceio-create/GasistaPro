@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -79,16 +80,17 @@
     transition: opacity 0.6s ease;
   }
   #splash.hide { opacity: 0; pointer-events: none; }
-  .splash-flame {
-    width: 80px; height: 80px;
-    background: linear-gradient(160deg, var(--fire) 0%, var(--flame-light) 50%, var(--flame) 100%);
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-    animation: flicker 1.2s ease-in-out infinite alternate;
-    box-shadow: 0 0 40px var(--fire), 0 0 80px rgba(61,190,92,0.35);
+  .splash-flame-wrap {
+    width: 96px; height: 96px;
+    display: flex; align-items: center; justify-content: center;
+    animation: flicker 1.4s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 22px var(--fire)) drop-shadow(0 0 46px rgba(61,190,92,0.4));
   }
+  .splash-flame-svg { width: 100%; height: 100%; display: block; }
   @keyframes flicker {
-    from { transform: scaleX(1) scaleY(1) rotate(-2deg); }
-    to { transform: scaleX(0.92) scaleY(1.08) rotate(2deg); }
+    0%   { transform: scaleX(1) scaleY(1) rotate(-2deg); }
+    50%  { transform: scaleX(0.95) scaleY(1.05) rotate(1deg); }
+    100% { transform: scaleX(1.03) scaleY(0.97) rotate(2deg); }
   }
   .splash-title { font-family:'Outfit',sans-serif; font-size:32px; font-weight:800; color:var(--text); letter-spacing:-0.5px; line-height:1; }
   .splash-sub { color:var(--muted); font-size:11px; letter-spacing:3px; text-transform:uppercase; font-weight:500; margin-top:4px; }
@@ -96,25 +98,30 @@
   /* ===== LAYOUT ===== */
   #app { display:flex; flex-direction:column; min-height:100vh; min-height:100dvh; min-height:calc(var(--vh100, 100vh) * 1); }
 
-  /* TOP BAR */
+  /* TOP BAR (header now hosts the whole nav — nothing lives in a fixed footer anymore,
+     which is what was vanishing inside the Android WebView/APK wrapper) */
   .topbar {
     background: var(--coal);
-    padding: 16px 20px 12px;
-    display: flex; align-items: center; justify-content: space-between;
     position: sticky; top: 0; z-index: 100;
     border-bottom: 1px solid var(--border);
     backdrop-filter: blur(12px);
   }
-  .topbar-title { font-family:'Outfit',sans-serif; font-size:22px; font-weight:800; letter-spacing:-0.5px; line-height:1; }
+  .topbar-row1 {
+    padding: 14px 20px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-title { font-family:'Outfit',sans-serif; font-size:21px; font-weight:800; letter-spacing:-0.5px; line-height:1; }
   .topbar-title span { color:var(--fire); }
-  .topbar-right { display:flex; gap:10px; align-items:center; }
+  .topbar-right { display:flex; gap:8px; align-items:center; }
   .icon-btn {
-    width:38px; height:38px; border-radius:50%;
+    width:36px; height:36px; border-radius:50%;
     background:var(--surface); border:1px solid var(--border);
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; font-size:18px; transition:all 0.2s;
+    flex-shrink:0;
   }
   .icon-btn:active { transform:scale(0.92); background:var(--fire-glow); }
+  .icon-btn.pizza-btn { background:var(--fire-glow); border-color:rgba(61,190,92,0.35); color:var(--fire); }
   .badge {
     position:absolute; top:-4px; right:-4px;
     width:16px; height:16px; border-radius:50%;
@@ -124,38 +131,87 @@
   }
   .icon-btn-wrap { position:relative; }
 
-  /* MAIN CONTENT */
-  .content { flex:1; padding-bottom:calc(80px + env(safe-area-inset-bottom, 0px)); overflow-y:auto; -webkit-overflow-scrolling:touch; }
-
-  /* BOTTOM NAV */
-  .bottom-nav {
-    position: fixed; bottom:0; left:50%; transform:translateX(-50%);
-    width:100%; max-width:430px;
-    min-height:56px;
-    background: var(--coal);
-    border-top: 1px solid var(--border);
-    display: flex; z-index:9500;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  /* HEADER NAV ROW — replaces the old bottom-nav, lives inside the sticky header */
+  .topbar-nav {
+    display: flex;
+    padding: 0 10px 10px;
+    gap: 4px;
   }
-  .nav-item {
+  .tnav-item {
     flex:1; display:flex; flex-direction:column;
     align-items:center; justify-content:center;
-    padding:10px 4px 8px;
+    gap:2px;
+    padding:7px 4px;
+    border-radius: var(--radius-sm);
     cursor:pointer; transition:all 0.2s;
     position:relative;
     min-width:0;
   }
-  .nav-item .nav-icon {
-    font-size:22px; transition:all 0.2s; line-height:1;
-    font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Segoe UI Symbol", sans-serif;
+  .tnav-item .tnav-icon { font-size:19px; line-height:1; display:flex; transition:all 0.2s; }
+  .tnav-item .tnav-label { font-size:9.5px; color:var(--muted); transition:all 0.2s; letter-spacing:0.3px; font-weight:600; font-family:'Outfit',sans-serif; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .tnav-item.active { background: var(--fire-glow); }
+  .tnav-item.active .tnav-icon { color:var(--fire); filter:drop-shadow(0 0 6px var(--fire-glow)); }
+  .tnav-item.active .tnav-label { color:var(--fire); font-weight:700; }
+  .tnav-item:active { transform:scale(0.95); }
+
+  /* MAIN CONTENT */
+  .content { flex:1; padding-bottom:calc(90px + env(safe-area-inset-bottom, 0px)); overflow-y:auto; -webkit-overflow-scrolling:touch; }
+
+  /* ===== PIZZA MENU (radial "fatia" menu for the items that don't fit the header) ===== */
+  .pizza-overlay {
+    position: fixed; inset: 0; z-index: 9600;
+    background: rgba(5,10,5,0.72);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
   }
-  .nav-item .nav-label { font-size:10px; margin-top:3px; color:var(--muted); transition:all 0.2s; letter-spacing:0.3px; font-weight:600; font-family:'Outfit',sans-serif; text-transform:uppercase; }
-  .nav-item.active .nav-icon { filter:drop-shadow(0 0 8px var(--fire)); transform:translateY(-2px); }
-  .nav-item.active .nav-label { color:var(--fire); font-weight:700; }
-  .nav-item.active::before {
-    content:''; position:absolute; top:0; left:20%; right:20%; height:2px;
-    background:var(--fire); border-radius:0 0 4px 4px;
+  .pizza-overlay.open { opacity: 1; pointer-events: auto; }
+  .pizza-wheel {
+    position: relative;
+    width: 272px; height: 272px;
+    border-radius: 50%;
+    transform: scale(0.7); transition: transform 0.3s cubic-bezier(.34,1.4,.64,1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 6px rgba(255,255,255,0.03);
+    background: conic-gradient(from 0deg,
+      var(--flame-light) 0deg 88deg, var(--deep) 88deg 92deg,
+      var(--gold) 92deg 178deg, var(--deep) 178deg 182deg,
+      var(--info) 182deg 268deg, var(--deep) 268deg 272deg,
+      var(--flame) 272deg 358deg, var(--deep) 358deg 360deg
+    );
+  }
+  .pizza-overlay.open .pizza-wheel { transform: scale(1); }
+  .pizza-slice {
+    position: absolute; top:50%; left:50%;
+    width:0; height:0;
+  }
+  .pizza-slice-inner {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:5px;
+    width:74px; height:74px; margin:-37px 0 0 -37px;
+    cursor:pointer;
+  }
+  .pizza-slice-inner .ps-icon {
+    width:34px; height:34px; border-radius:50%;
+    background:rgba(8,15,8,0.55); border:1px solid rgba(255,255,255,0.25);
+    display:flex; align-items:center; justify-content:center; color:#fff;
+    font-size:17px;
+  }
+  .pizza-slice-inner .ps-label { font-size:10.5px; font-weight:700; color:#fff; font-family:'Outfit',sans-serif; letter-spacing:0.2px; text-shadow:0 1px 4px rgba(0,0,0,0.5); white-space:nowrap; }
+  .pizza-slice-inner:active .ps-icon { transform:scale(0.9); background:rgba(0,0,0,0.7); }
+  .pizza-center {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:78px; height:78px; border-radius:50%;
+    background: var(--deep); border:2px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted); font-size:22px; cursor:pointer;
+    box-shadow: inset 0 0 0 6px var(--coal);
+  }
+  .pizza-center:active { transform:translate(-50%,-50%) scale(0.9); }
+  .pizza-hint {
+    position:absolute; left:50%; transform:translateX(-50%);
+    bottom: calc(50% - 175px);
+    color: var(--muted); font-size:12px; text-align:center; width:260px;
   }
 
   /* ===== PAGES ===== */
@@ -628,7 +684,7 @@
 
   /* ===== FAB ===== */
   .fab {
-    position:fixed; bottom:calc(90px + env(safe-area-inset-bottom, 0px)); right:20px;
+    position:fixed; bottom:calc(20px + env(safe-area-inset-bottom, 0px)); right:20px;
     width:52px; height:52px; border-radius:50%;
     background:var(--fire); color:#fff;
     display:flex; align-items:center; justify-content:center;
@@ -676,7 +732,18 @@
 
 <!-- SPLASH -->
 <div id="splash">
-  <div class="splash-flame"></div>
+  <div class="splash-flame-wrap">
+    <svg class="splash-flame-svg" viewBox="0 0 24 24">
+      <defs>
+        <linearGradient id="splashFlameGrad" x1="0.5" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stop-color="var(--fire)"/>
+          <stop offset="55%" stop-color="var(--flame-light)"/>
+          <stop offset="100%" stop-color="var(--flame)"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#splashFlameGrad)" d="M12 2c1 3-3 4-3 8a3 3 0 0 0 6 0c0-1-1-2-1-2 2 1 3 3 3 5a5 5 0 0 1-10 0c0-5 3-6 5-11z"/>
+    </svg>
+  </div>
   <div class="splash-title">PEIXOTO <span style="color:var(--fire)">Pro</span></div>
   <div class="splash-sub">Téc. Gasista · Residencial e Comercial</div>
 </div>
@@ -684,16 +751,34 @@
 <!-- APP -->
 <div id="app">
 
-  <!-- TOP BAR -->
+  <!-- TOP BAR (header holds the whole navigation now — see pizza menu below for overflow) -->
   <div class="topbar">
-    <div class="topbar-title" id="topbar-title">PEIXO<span>TO</span></div>
-    <div class="topbar-right">
-      <div class="icon-btn-wrap">
-        <div class="icon-btn" onclick="openNotifModal()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></div>
-        <div class="badge" id="notif-badge" style="display:none">3</div>
+    <div class="topbar-row1">
+      <div class="topbar-title" id="topbar-title">PEIXO<span>TO</span></div>
+      <div class="topbar-right">
+        <div class="icon-btn-wrap">
+          <div class="icon-btn" onclick="openNotifModal()"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></div>
+          <div class="badge" id="notif-badge" style="display:none">3</div>
+        </div>
+        <div class="icon-btn pizza-btn" id="pizza-toggle-btn" onclick="togglePizzaMenu()" title="Mais opções">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18"/></svg>
+        </div>
       </div>
-      <div class="icon-btn" onclick="navigate('perfil')"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
     </div>
+    <nav class="topbar-nav" id="topbar-nav">
+      <div class="tnav-item active" onclick="navigate('home')" id="nav-home">
+        <div class="tnav-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg></div>
+        <div class="tnav-label">Início</div>
+      </div>
+      <div class="tnav-item" onclick="navigate('os')" id="nav-os">
+        <div class="tnav-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6M9 15h6"/></svg></div>
+        <div class="tnav-label">Ordens</div>
+      </div>
+      <div class="tnav-item" onclick="navigate('clientes')" id="nav-clientes">
+        <div class="tnav-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 2.5-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14c2.5.3 4.5 2 4.5 5"/></svg></div>
+        <div class="tnav-label">Clientes</div>
+      </div>
+    </nav>
   </div>
 
   <!-- CONTENT -->
@@ -1163,29 +1248,44 @@
 
   </div><!-- end content -->
 
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <div class="nav-item active" onclick="navigate('home')" id="nav-home">
-      <div class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg></div><div class="nav-label">Início</div>
-    </div>
-    <div class="nav-item" onclick="navigate('os')" id="nav-os">
-      <div class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6M9 15h6"/></svg></div><div class="nav-label">Ordens</div>
-    </div>
-    <div class="nav-item" onclick="navigate('clientes')" id="nav-clientes">
-      <div class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 2.5-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14c2.5.3 4.5 2 4.5 5"/></svg></div><div class="nav-label">Clientes</div>
-    </div>
-    <div class="nav-item" onclick="navigate('financeiro')" id="nav-financeiro">
-      <div class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14" r="1.3"/></svg></div><div class="nav-label">Financeiro</div>
-    </div>
-    <div class="nav-item" onclick="navigate('agenda')" id="nav-agenda">
-      <div class="nav-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16"/><path d="M8 3v4M16 3v4"/><path d="M9 13h2M13 13h2M9 17h2"/></svg></div><div class="nav-label">Agenda</div>
-    </div>
-  </nav>
-
   <!-- FAB -->
   <button class="fab" id="fab-btn" onclick="handleFab()">+</button>
 
 </div><!-- end app -->
+
+<!-- PIZZA MENU (radial overflow menu, opened from the header's grid button) -->
+<div class="pizza-overlay" id="pizza-overlay" onclick="closePizzaMenuBackdrop(event)">
+  <div class="pizza-hint">Toque numa fatia para abrir</div>
+  <div class="pizza-wheel">
+    <div class="pizza-slice" style="transform:rotate(44deg) translate(0,-95px);">
+      <div class="pizza-slice-inner" style="transform:rotate(-44deg);" onclick="navigate('financeiro')" id="nav-financeiro">
+        <div class="ps-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14" r="1.3"/></svg></div>
+        <div class="ps-label">Financeiro</div>
+      </div>
+    </div>
+    <div class="pizza-slice" style="transform:rotate(135deg) translate(0,-95px);">
+      <div class="pizza-slice-inner" style="transform:rotate(-135deg);" onclick="navigate('agenda')" id="nav-agenda">
+        <div class="ps-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 9h16"/><path d="M8 3v4M16 3v4"/><path d="M9 13h2M13 13h2M9 17h2"/></svg></div>
+        <div class="ps-label">Agenda</div>
+      </div>
+    </div>
+    <div class="pizza-slice" style="transform:rotate(225deg) translate(0,-95px);">
+      <div class="pizza-slice-inner" style="transform:rotate(-225deg);" onclick="openNotifModal(); closePizzaMenu();">
+        <div class="ps-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></div>
+        <div class="ps-label">Avisos</div>
+      </div>
+    </div>
+    <div class="pizza-slice" style="transform:rotate(315deg) translate(0,-95px);">
+      <div class="pizza-slice-inner" style="transform:rotate(-315deg);" onclick="navigate('perfil')">
+        <div class="ps-icon"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+        <div class="ps-label">Perfil</div>
+      </div>
+    </div>
+    <div class="pizza-center" onclick="closePizzaMenu()">
+      <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </div>
+  </div>
+</div>
 
 <!-- ===== MODALS ===== -->
 
@@ -1672,6 +1772,7 @@ const fabActions = {
 let currentPage = 'home';
 
 function navigate(page) {
+  closePizzaMenu();
   currentPage = page;
   pages.forEach(p => {
     document.getElementById('page-'+p)?.classList.toggle('active', p===page);
@@ -1698,6 +1799,21 @@ function navigate(page) {
 
 function handleFab() {
   if (fabActions[currentPage]) fabActions[currentPage]();
+}
+
+// ========== PIZZA MENU (radial overflow nav) ==========
+function togglePizzaMenu() {
+  const overlay = document.getElementById('pizza-overlay');
+  overlay.classList.contains('open') ? closePizzaMenu() : openPizzaMenu();
+}
+function openPizzaMenu() {
+  document.getElementById('pizza-overlay').classList.add('open');
+}
+function closePizzaMenu() {
+  document.getElementById('pizza-overlay').classList.remove('open');
+}
+function closePizzaMenuBackdrop(e) {
+  if (e.target.id === 'pizza-overlay') closePizzaMenu();
 }
 
 // ========== TOAST ==========
@@ -2643,7 +2759,7 @@ async function showLocalNotification(title, body) {
     } else if ('Notification' in window && Notification.permission === 'granted') {
       new Notification(title, { body, icon: 'icon-192.png' });
     }
-  } catch (e) { console.warn('Notificação falhou:', e); }
+  } catch (e) { safeLog('warn', 'Notificação falhou:', e); }
 }
 
 async function checkNotificationReminders() {
@@ -2746,10 +2862,22 @@ const canUseServiceWorker = 'serviceWorker' in navigator
 
 if (canUseServiceWorker) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW falhou:', err));
+    navigator.serviceWorker.register('sw.js').catch(err => safeLog('warn', 'SW falhou:', err));
   });
 } else if ('serviceWorker' in navigator) {
-  console.info('Service Worker não registrado: é preciso servir o app via HTTPS (ou localhost). Abrir o arquivo direto (file://) não funciona para isso — o resto do app funciona normalmente.');
+  safeLog('info', 'Service Worker não registrado: é preciso servir o app via HTTPS (ou localhost). Abrir o arquivo direto (file://) não funciona para isso — o resto do app funciona normalmente.');
+}
+
+// safe logger — some Android WebView wrappers expose a partial `console`
+// object (missing .info, sometimes .warn), which throws instead of no-op.
+function safeLog(level, ...args) {
+  try {
+    if (typeof console !== 'undefined' && typeof console[level] === 'function') {
+      console[level](...args);
+    } else if (typeof console !== 'undefined' && typeof console.log === 'function') {
+      console.log(...args);
+    }
+  } catch (e) { /* no-op: logging must never break the app */ }
 }
 
 init();
